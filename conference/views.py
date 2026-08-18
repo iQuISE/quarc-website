@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from django.template.loader import render_to_string
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
