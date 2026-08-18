@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Attend{% endblock %}
+{% block content %}
+<div class="content-section">
+<h2>How to Attend</h2>
+<p>QuARC is open to university faculty, industry personnel, students who wish to present at the conference. Registration is open for affiliates of MIT, Harvard, and collaborating research organizations.</p>
+<p>The attendance costs–including hotel rooms, transportation, and swag–of students, faculty, and research scientists in the Boston area will be covered by CQE.</p>
+<p>For people outside of these organizations who wish to attend QuARC, please email <a href="mailto:quarc{{conference.year}}-exec@mit.edu">quarc{{conference.year}}-exec@mit.edu</a>.</p>
+<p>On this page you will find information on how to register and submit your abstract if you wish to present.</p>
+<h2>Authors</h2>
+<p>Undergraduate and graduate students who wish to attend need to submit an abstract.</p>
+<p>You can find the registration page under the “Attend” tab or follow this <a href="abstract-submission">link</a>.</p>
+<p>The registration deadline is {{ conference.registration_end|date:"F jS, Y" }}.</p>
+<p>NOTE that students who are attending both QuARC and MARC are expected to submit a poster at QuARC and highly encouraged to submit a poster to MARC. They may use the same poster for both events. Students attending both QuARC and MARC must register for both events.</p>
+<h2>Industry Personnel and Non-Authors</h2>
+<p>University faculty, industry personnel, and postdocs who wish to attend can find the registration page under the “Attend” tab.</p>
+<p><i>NOTE that students must submit abstracts in order to attend QuARC {{conference.year}}. Postdocs and other researchers are also highly encouraged to submit abstracts.</i></p>
+</div>
+{% endblock %}

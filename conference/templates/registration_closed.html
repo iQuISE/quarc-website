@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Attend{% endblock %}
+{% block content %}
+<div class="content-section">
+<h2>Registration Closed</h2>
+{% if will_open %}
+<p>More information about registration and abstract submission coming soon.</p>
+<p>Stay tuned!</p>
+{% else %}
+<p>Registration for <strong>QuARC</strong> {{conf.year}} is now <strong>closed</strong>.</p>
+<p>Hope to see you all soon!</p>
+{% endif %}
+</div>
+{% endblock %}

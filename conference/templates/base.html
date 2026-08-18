@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUARC {{conference.year}} - {% block title %}QSEC Annual Research Conference{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2ea3f2;
+            --secondary-color: #8300e9;
+            --dark-color: #1a1a1a;
+            --light-color: #ffffff;
+            --accent-color: #7EBEC5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #fff;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand img {
+            max-height: 80px;
+            width: auto;
+        }
+
+        .navbar-nav {
+            align-items: center;
+        }
+
+        .nav-link {
+            color: rgba(0, 0, 0, 0.6);
+            font-weight: 700;
+            padding: 10px 15px !important;
+            transition: color 0.3s ease;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+            opacity: 0.7;
+        }
+
+        .nav-link.active {
+            color: var(--primary-color) !important;
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-top: 3px solid var(--primary-color);
+            padding: 10px 0;
+            min-width: 200px;
+        }
+
+        .dropdown-item {
+            color: rgba(0, 0, 0, 0.6);
+            padding: 8px 20px;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+            color: var(--primary-color);
+        }
+
+        .dropdown-item.active {
+            color: var(--primary-color);
+        }
+
+        .countdown-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            position: relative;
+            color: white;
+            padding: 60px 0 40px;
+            margin-bottom: 30px;
+            min-height: 500px;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .countdown-title {
+            font-size: 42px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .countdown-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .countdown-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
+            min-width: 100px;
+        }
+
+        .countdown-number {
+            font-size: 54px;
+            font-weight: 700;
+            line-height: 1;
+            min-width: 80px;
+        }
+
+        .countdown-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            background-image: url('static/{{background_image}}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            padding: 80px 0;
+            position: relative;
+        }
+
+        .main-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-section h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .content-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .content-section h3 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin: 30px 0 15px;
+        }
+
+        .content-section p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .content-section strong {
+            color: var(--dark-color);
+        }
+
+        .footer {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #5a00b3 100%);
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: white;
+        }
+
+        @media (max-width: 992px) {
+            .countdown-title {
+                font-size: 32px;
+            }
+
+            .countdown-container {
+                gap: 15px;
+            }
+
+            .countdown-item {
+                min-width: 70px;
+                padding: 15px;
+            }
+
+            .countdown-number {
+                font-size: 40px;
+                min-width: 60px;
+            }
+
+            .countdown-label {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 10px 0;
+            }
+
+            .navbar-brand img {
+                max-height: 30px;
+            }
+
+            .nav-link {
+                padding: 8px 10px !important;
+                font-size: 11px;
+            }
+
+            .countdown-title {
+                font-size: 26px;
+            }
+
+            .countdown-container {
+                gap: 10px;
+            }
+
+            .countdown-item {
+                min-width: 50px;
+                padding: 10px;
+            }
+
+            .countdown-number {
+                font-size: 32px;
+                min-width: 50px;
+            }
+
+            .countdown-label {
+                font-size: 10px;
+            }
+
+            .main-content {
+                padding: 40px 0;
+            }
+
+            .content-section {
+                padding: 25px;
+                margin-bottom: 20px;
+            }
+
+            .content-section h2 {
+                font-size: 26px;
+            }
+
+            .content-section h3 {
+                font-size: 20px;
+            }
+
+            .content-section p {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .countdown-title {
+                font-size: 22px;
+            }
+
+            .countdown-container {
+                gap: 5px;
+            }
+
+            .countdown-item {
+                min-width: 45px;
+                padding: 8px;
+            }
+
+            .countdown-number {
+                font-size: 28px;
+                min-width: 45px;
+            }
+
+            .countdown-label {
+                font-size: 9px;
+            }
+
+            .content-section {
+                padding: 20px;
+            }
+
+            .content-section h2 {
+                font-size: 22px;
+            }
+
+            .content-section h3 {
+                font-size: 18px;
+            }
+
+            .content-section p {
+                font-size: 14px;
+            }
+        }
+
+        .dropdown-menu.show {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+	{% block extend_style %}{% endblock %}
+    </head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="/media/{{conference.logo}}" alt="QuARC {{conference.year}} Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/quarc{{conference.year}}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="program">Program</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quarc{{conference.year}}/committee">Committee</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="attendDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Attend
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="attendDropdown">
+                            <li><a class="dropdown-item" href="/quarc{{conference.year}}/attend/">Important information</a></li>
+							{% if conference.abstract_submission_active %}
+                            <li><a class="dropdown-item" href="/quarc{{conference.year}}/abstract-submission/">Abstract Submission Open</a></li>
+							{% else %}
+                            <li><a class="dropdown-item" href="/quarc{{conference.year}}/abstract-submission-closed/">Abstract Submission Closed</a></li>
+							{% endif %}
+							{% if conference.university_industry_registration_active %}
+                            <li><a class="dropdown-item" href="/quarc{{conference.year}}/university-and-industry-personnel/">University and Industry Personnel</a></li>
+							{% endif %}
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/quarc{{conference.year}}/qsec-membership">QSEC Membership</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="previousDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Previous events
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="previousDropdown">
+                            <li><a class="dropdown-item" href="https://cqe.mit.edu/quarc2025/">QuARC2025</a></li>
+                            <li><a class="dropdown-item" href="https://cqe.mit.edu/quarc2024/">QuARC2024</a></li>
+                            <li><a class="dropdown-item" href="https://cqe.mit.edu/quarc2023/">QuARC2023</a></li>
+                            <li><a class="dropdown-item" href="https://cqe.mit.edu/quarc2022/">QuARC2022</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="partnersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Partners
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="partnersDropdown">
+                            <li><a class="dropdown-item" href="http://cqe.mit.edu">CQE</a></li>
+                            <li><a class="dropdown-item" href="https://www.iquise.mit.edu/">iQuISE</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="main-content">
+        <div class="content-wrapper">
+			{% if show_countdown %}
+			<div class="countdown-content">
+				<h1 class="countdown-title">QUARC {{conference.year}}</h1>
+				
+				<div class="countdown-container">
+					<div class="countdown-item">
+						<div class="countdown-number" id="days">00</div>
+						<div class="countdown-label">Days</div>
+					</div>
+					<div class="countdown-item">
+						<div class="countdown-number" id="hours">00</div>
+						<div class="countdown-label">Hours</div>
+					</div>
+					<div class="countdown-item">
+						<div class="countdown-number" id="minutes">00</div>
+						<div class="countdown-label">Minutes</div>
+					</div>
+					<div class="countdown-item">
+						<div class="countdown-number" id="seconds">00</div>
+						<div class="countdown-label">Seconds</div>
+					</div>
+				</div>
+				
+				<p class="mt-4" style="font-size: 18px; opacity: 0.9;">{{conference.start_date}}</p>
+			</div>
+			{% endif %}
+
+			{% block content %}
+			{% endblock %}
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="mb-0">Copyright © 2025-2026 Massachusetts Institute of Technology – all rights reserved</p>
+            <p class="mt-2">
+                <a href="https://accessibility.mit.edu/">Accessibility</a>
+				<a href="/admin">Admin</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% if show_countdown %}
+    <script>
+        const targetDate = new Date('{{ conference.start_date|date:"Y-m-d" }}T{{ conference.start_time|time:"H:i:s" }}').getTime();
+        
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            
+            if (distance < 0) {
+                document.getElementById('days').textContent = '00';
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+                return;
+            }
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').textContent = String(days).padStart(2, '0');
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+        
+        // Update countdown every second
+        setInterval(updateCountdown, 1000);
+        updateCountdown(); // Initial call
+    </script>
+	{% endif %}
+	{% block extend_scripts %}{% endblock %}
+</body>
+</html>

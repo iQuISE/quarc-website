@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-section">
+	<h2>Logistics Form</h2>
+	<p>Welcome {{attendee.first_name}} {{attendee.last_name}}. Please complete the logistics form.</p>
+	<form method="post" action="#">
+		{% csrf_token %}
+		<input type="hidden" name="email" value="{{attendee.email}}">
+		<h3>Housing</h3>
+		{% if housing_form.errors %}
+		<div class="alert alert-danger">
+			<h5>Housing Form Errors</h5>
+			<ul>
+				{% for field, errors in housing_form.errors.items %}
+				<li><strong>{{ field }}:</strong>
+					<ul>
+						{% for error in errors %}
+						<li>{{ error }}</li>
+						{% endfor %}
+					</ul>
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+		<div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="id_overnight_required" name="overnight_required" value="True" {% if housing_form.instance.overnight_required %}checked{% endif %}>
+                    <label class="form-check-label" for="id_overnight_required">
+                        I require overnight accommodation
+                    </label>
+                </div>
+            </div>
+        </div>
+		{% if needs_roommate %}
+		<div class="row mb-3 overnight-section">
+            <div class="col-md-6">
+				<label for="id_preferred_roommate" class="form-label">Preferred Roommate</label>
+				<select class="form-select" id="id_preferred_roommate" name="preferred_roommate">
+					<option value="">-- Select --</option>
+					{% for roommate_option in roommate_options %}
+					<option value="{{roommate_option.0}}" {% if housing_form.instance.preferred_roommate.id == roommate_option.0 %}selected{% endif %}>{{roommate_option.1}}</option>
+					{% endfor %}
+					<option value="">Other</option>
+				</select>
+            </div>
+            <div class="col-md-6" id="roommate_other">
+				<label for="id_preferred_roommate_name" class="form-label">Preferred Roommate Name</label>
+				<input type="text" class="form-control" id="id_preferred_roommate_name" name="preferred_roommate_name" value="{{housing_form.instance.preferred_roommate_name}}">
+            </div>
+        </div>
+        <div class="row mb-3 overnight-section">
+            <div class="col-md-6">
+				<label for="id_gender" class="form-label">Your Gender</label>
+				<select class="form-select" id="id_gender" name="gender">
+					<option value="">-- Select --</option>
+					<option value="Male" {% if housing_form.instance.gender == 'Male' %}selected{% endif %}>Male</option>
+					<option value="Female" {% if housing_form.instance.gender == 'Female' %}selected{% endif %}>Female</option>
+					<option value="Non-binary" {% if housing_form.instance.gender == 'Non-binary' %}selected{% endif %}>Non-binary</option>
+					<option value="Prefer not to say" {% if housing_form.instance.gender == 'Prefer not to say' %}selected{% endif %}>Prefer not to say</option>
+				</select>
+            </div>
+            <div class="col-md-6">
+				<label for="id_preferred_roommate_gender" class="form-label">Preferred Roommate Gender</label>
+				<select class="form-select" id="id_preferred_roommate_gender" name="preferred_roommate_gender">
+					<option value="">-- Select --</option>
+					<option value="Male" {% if housing_form.instance.preferred_roommate_gender == 'Male' %}selected{% endif %}>Male</option>
+					<option value="Female" {% if housing_form.instance.preferred_roommate_gender == 'Female' %}selected{% endif %}>Female</option>
+					<option value="Non-binary" {% if housing_form.instance.preferred_roommate_gender == 'Non-binary' %}selected{% endif %}>Non-binary</option>
+					<option value="Prefer not to say" {% if housing_form.instance.preferred_roommate_gender == 'Prefer not to say' %}selected{% endif %}>Prefer not to say</option>
+				</select>
+            </div>
+        </div>
+		{% endif %}
+
+		<h3>Dinner</h3>
+		{% if dinner_form.errors %}
+		<div class="alert alert-danger">
+			<h5>Dinner Form Errors</h5>
+			<ul>
+				{% for field, errors in dinner_form.errors.items %}
+				<li><strong>{{ field }}:</strong>
+					<ul>
+						{% for error in errors %}
+						<li>{{ error }}</li>
+						{% endfor %}
+					</ul>
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+		<div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="id_dinner_required" name="dinner_required" value="True" {% if dinner_form.instance.dinner_required %}checked{% endif %}>
+                    <label class="form-check-label" for="id_dinner_required">
+                        I will attend dinner
+                    </label>
+                </div>
+				<div class="dinner-section">
+					<label for="id_dinner_option" class="form-label">Dinner Option</label>
+					<select class="form-select" id="id_dinner_option" name="dinner_option">
+						{% for dinner_option in dinner_options %}
+						<option value="{{dinner_option.0}}" {% if dinner_form.instance.dinner_option.id == dinner_option.0 %}selected{% endif %}>{{dinner_option.1}}</option>
+						{% endfor %}
+					</select>
+				</div>
+            </div>
+            <div class="col-md-6 dinner-section">
+				<p>Dietary Restrictions</p>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="id_vegetarian" name="vegetarian" value="True" {% if dinner_form.instance.vegetarian %}checked{% endif %}>
+                    <label class="form-check-label" for="id_vegetarian">
+                        Vegetarian
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="id_vegan" name="vegan" value="True" {% if dinner_form.instance.vegan %}checked{% endif %}>
+                    <label class="form-check-label" for="id_vegan">
+                        Vegan
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="id_gluten_free" name="gluten_free" value="True" {% if dinner_form.instance.gluten_free %}checked{% endif %}>
+                    <label class="form-check-label" for="id_gluten_free">
+                        Gluten-free
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="id_kosher" name="kosher" value="True" {% if dinner_form.instance.kosher %}checked{% endif %}>
+                    <label class="form-check-label" for="id_kosher">
+                        Kosher
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="id_halal" name="halal" value="True" {% if dinner_form.instance.halal %}checked{% endif %}>
+                    <label class="form-check-label" for="id_halal">
+                        Halal
+                    </label>
+                </div>
+				<label for="id_other_restriction" class="form-label">Other Dietary Restrictions</label>
+				<input type="text" class="form-control" id="id_other_restriction" name="other_restriction" value="{{dinner_form.instance.other_restriction}}" placeholder="Please specify">
+            </div>
+        </div>
+
+		<h3>Winter Activities</h3>
+		{% if activities_form.errors %}
+		<div class="alert alert-danger">
+			<h5>Winter Activities Form Errors</h5>
+			<ul>
+				{% for field, errors in activities_form.errors.items %}
+				<li><strong>{{ field }}:</strong>
+					<ul>
+						{% for error in errors %}
+						<li>{{ error }}</li>
+						{% endfor %}
+					</ul>
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+		<div class="row mb-3">
+            <div class="col-md-6">
+				<label for="id_winter_activities" class="form-label">Winter Activities</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="id_winter_activities" name="winter_activities" value="True" {% if activities_form.instance.winter_activities %}checked{% endif %}>
+                    <label class="form-check-label" for="id_winter_activities">
+                        I plan to ski on {{ conference.start_date|date:"l, F jS" }}
+                    </label>
+                </div>
+            </div>
+        </div>
+
+		<h3>Swag</h3>
+		{% if swag_form.errors %}
+		<div class="alert alert-danger">
+			<h5>Swag Form Errors</h5>
+			<ul>
+				{% for field, errors in swag_form.errors.items %}
+				<li><strong>{{ field }}:</strong>
+					<ul>
+						{% for error in errors %}
+						<li>{{ error }}</li>
+						{% endfor %}
+					</ul>
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+		<div class="row mb-3">
+            <div class="col-md-12">
+				<label for="id_swag_option" class="form-label">Swag Option <span class="text-danger">*</span></label>
+				<select class="form-select" id="id_swag_option" name="swag_option">
+					{% for swag_option in swag_options %}
+					<option value="{{swag_option.0}}" {% if swag_form.instance.swag_option.id == swag_option.0 %}selected{% endif %}>{{swag_option.1}}</option>
+					{% endfor %}
+				</select>
+            </div>
+        </div>
+
+		<h3>Transportation</h3>
+		{% if bus_form.errors %}
+		<div class="alert alert-danger">
+			<h5>Bus Form Errors</h5>
+			<ul>
+				{% for field, errors in bus_form.errors.items %}
+				<li><strong>{{ field }}:</strong>
+					<ul>
+						{% for error in errors %}
+						<li>{{ error }}</li>
+						{% endfor %}
+					</ul>
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+		<div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="id_bus_to_required" name="bus_to_required" value="True" {% if bus_form.instance.bus_to_required %}checked{% endif %}>
+                    <label class="form-check-label" for="id_bus_to_required">
+                        I will take the bus traveling to the conference from MIT to QuARC.
+                    </label>
+                </div>
+				<div class="bus-to-section">
+					<label for="id_bus_to_type" class="form-label">Bus Time</label>
+					<select class="form-select" id="id_bus_to_type" name="bus_to_type">
+						<option value="">-- Select --</option>
+						<option value="0" {% if bus_form.instance.bus_to_type == 0 %}selected{% endif %}>Early</option>
+						<option value="1" {% if bus_form.instance.bus_to_type == 1 %}selected{% endif %}>Late</option>
+					</select>
+				</div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="id_bus_from_required" name="bus_from_required" value="True" {% if bus_form.instance.bus_from_required %}checked{% endif %}>
+                    <label class="form-check-label" for="id_bus_from_required">
+                        I will take the bus returning from the conference from QuARC to MIT.
+                    </label>
+                </div>
+            </div>
+        </div>
+
+		<div class="text-center">
+            <button type="submit" class="btn btn-primary">Submit</button>
+		</div>
+	</form>
+</div>
+
+{% endblock %}
+{% block extend_scripts %}
+<script>
+ document.addEventListener('DOMContentLoaded', function() {
+	 function hideByCheckbox(checkbox_id, hide_class){
+		 const hideCheckbox = document.getElementById(checkbox_id)
+		 const hideDivs = document.getElementsByClassName(hide_class);
+		 function updateHide(){
+			 if(hideCheckbox.checked){
+				 for(const hideDiv of hideDivs){
+					 hideDiv.style.display = hideDiv.hidden_style;
+				 }
+			 }
+			 else{
+				 for(const hideDiv of hideDivs){
+					 hideDiv.hidden_style = hideDiv.style.display;
+					 hideDiv.style.display = 'none';
+				 }
+			 }
+		 }
+		 hideCheckbox.addEventListener('change', updateHide);
+		 updateHide();
+	 }
+
+	 hideByCheckbox('id_overnight_required', 'overnight-section');
+	 hideByCheckbox('id_dinner_required', 'dinner-section');
+	 hideByCheckbox('id_bus_to_required', 'bus-to-section');
+
+     const roommateSelector = document.getElementById('id_preferred_roommate');
+     const roommateOther = document.getElementById('roommate_other');
+	 function updateRoommateOther(){
+		 if(roommateSelector.value === ''){
+			 roommateOther.style.display = roommateOther.hidden_style;
+		 }
+		 else{
+			 roommateOther.hidden_style = roommateOther.style.display;
+			 roommateOther.style.display = 'none';
+		 }
+	 }
+     roommateSelector.addEventListener('change', updateRoommateOther);
+     updateRoommateOther();
+ });
+</script>
+{% endblock %}

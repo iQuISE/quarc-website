@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-section">
+	<h2>Registration with Abstract</h2>
+	<p> Registration form for students and postdocs who are submitting abstracts to QuARC {{conference.year}}. Please register by {{ conference.registration_end|date:"F jS, Y" }}. Industry members, staff, and faculty are not required to submit abstracts and may use the <a href="/quarc{{conference.year}}/university-and-industry-personnel">University and Industry Personnel</a> page.</p>
+	<form method="post" action="#">
+		{% csrf_token %}
+		{% if attendee_form.errors %}
+		<div class="alert alert-danger">
+			<h5>Personal Information Errors</h5>
+			<ul>
+				{% for field, errors in attendee_form.errors.items %}
+				<li><strong>{{ field }}:</strong>
+					<ul>
+						{% for error in errors %}
+						<li>{{ error }}</li>
+						{% endfor %}
+					</ul>
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+		<div class="row mb-3">
+            <div class="col-md-6">
+				<label for="id_first_name" class="form-label">First Name <span class="text-danger">*</span></label>
+				<input type="text" class="form-control" id="id_first_name" name="first_name" value="{{attendee_form.instance.first_name}}" required>
+            </div>
+            <div class="col-md-6">
+				<label for="id_last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
+				<input type="text" class="form-control" id="id_last_name" name="last_name" value="{{attendee_form.instance.last_name}}" required>
+            </div>
+		</div>
+		<div class="row mb-3">
+            <div class="col-md-6">
+				<label for="id_email" class="form-label">Email <span class="text-danger">*</span></label>
+				<input type="email" class="form-control" id="id_email" name="email" placeholder="Enter Email" value="{{attendee_form.instance.email}}" required>
+            </div>
+            <div class="col-md-6">
+				<label for="id_email_confirm" class="form-label">Confirm Email <span class="text-danger">*</span></label>
+				<input type="email" class="form-control" id="id_email_confirm" name="email_confirm" placeholder="Confirm Email" required>
+            </div>
+		</div>
+		<div class="mb-3">
+            <label for="id_affiliation" class="form-label">Affiliation <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="id_affiliation" name="affiliation" value="{{attendee_form.instance.affiliation}}" required>
+		</div>
+		<div class="mb-3">
+            <label for="id_status" class="form-label">Status <span class="text-danger">*</span></label>
+            <select class="form-select" id="id_status" name="status" required>
+				<option value="null">Select status...</option>
+				{% for status in status_choices %}
+				<option value="{{status.0}}"
+							   {% if status.0 == attendee_form.instance.status %}selected{% endif %}>{{status.1}}</option>
+				{% endfor %}
+            </select>
+            <small class="form-text text-muted">University or industry affiliation.</small>
+		</div>
+		<div class="mb-3">
+            <label for="id_attending_marc" class="form-label">Are you planning to register for MARC {{conference.year}}?<span class="text-danger">*</span></label>
+            <select class="form-select" id="id_attending_marc" name="attending_marc" required>
+				<option value="True">Yes</option>
+				<option value="False">No</option>
+            </select>
+		</div>
+		{% if abstract_form.errors %}
+		<div class="alert alert-danger">
+			<h5>Abstract Errors</h5>
+			<ul>
+				{% for field, errors in abstract_form.errors.items %}
+				<li><strong>{{ field }}:</strong>
+					<ul>
+						{% for error in errors %}
+						<li>{{ error }}</li>
+						{% endfor %}
+					</ul>
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+		<div class="row mb-3">
+            <div class="col-md-12">
+				<label for="id_title" class="form-label">Abstract Title <span class="text-danger">*</span></label>
+				<input type="text" class="form-control" id="id_title" name="title" value="{{abstract_form.instance.title}}" required>
+            </div>
+        </div>
+		<div class="row mb-3">
+            <div class="col-md-12">
+				<label for="id_author_list" class="form-label">Author List <span class="text-danger">*</span></label>
+				<input type="text" class="form-control" id="id_author_list" name="author_list" value="{{abstract_form.instance.author_list}}" required>
+            </div>
+        </div>
+		<div class="row mb-3">
+            <div class="col-md-12">
+				<label for="id_funding_sources" class="form-label">Funding Sources <span class="text-danger">*</span></label>
+				<input type="text" class="form-control" id="id_funding_sources" name="funding_sources" value="{{abstract_form.instance.funding_sources}}" required>
+            </div>
+        </div>
+		<div class="row mb-3">
+            <div class="col-md-12">
+				<label for="id_publications" class="form-label">Publications <span class="text-danger">*</span></label>
+				<input type="text" class="form-control" id="id_publications" name="publications" value="{{abstract_form.instance.publications}}" required>
+            </div>
+        </div>
+		<div class="row mb-3">
+            <div class="col-md-6">
+				<label for="id_figure" class="form-label">Figure</label>
+				<input type="file" class="form-control" id="id_figure" name="figure" accept="image/*">
+            </div>
+            <div class="col-md-6">
+				<label for="id_figure_caption" class="form-label">Figure Caption <span class="text-danger">*</span></label>
+				<textarea class="form-control" id="id_figure_caption" name="figure_caption" rows="3" required>{{abstract_form.instance.figure_caption}}</textarea>
+            </div>
+        </div>
+		<div class="row mb-3">
+            <div class="col-md-12">
+				<label for="id_abstract" class="form-label">Abstract Text <span class="text-danger">*</span></label>
+				<textarea class="form-control" id="id_abstract" name="abstract" rows="5" required>{{abstract_form.instance.abstract}}</textarea>
+            </div>
+        </div>
+		<div class="row mb-3">
+            <div class="col-md-4">
+				<label for="id_research_area" class="form-label">Research Area <span class="text-danger">*</span></label>
+				<input type="text" class="form-control" id="id_research_area" name="research_area" value="{{abstract_form.instance.research_area}}" required>
+            </div>
+            <div class="col-md-4">
+				<label for="id_research_group" class="form-label">Research Group <span class="text-danger">*</span></label>
+				<input type="text" class="form-control" id="id_research_group" name="research_group" value="{{abstract_form.instance.research_group}}" required>
+            </div>
+            <div class="col-md-4">
+				<label for="id_graduation_date" class="form-label">Graduation Date</label>
+				<input type="date" class="form-control" id="id_graduation_date" name="graduation_date" value="{{abstract_form.instance.graduation_date}}">
+            </div>
+        </div>
+		<div class="mb-3">
+            <label class="form-label">Elevator Pitch</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="id_elevator_pitch" name="elevator_pitch" value="True">
+                <label class="form-check-label" for="id_elevator_pitch">
+                    I would like to give an elevator pitch about my research
+                </label>
+            </div>
+        </div>
+		<div class="mb-3">
+            <label class="form-label">Oral Presentation</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="id_oral_presentation" name="oral_presentation" value="True">
+                <label class="form-check-label" for="id_oral_presentation">
+                    I would like to give an oral presentation.
+                </label>
+            </div>
+        </div>
+		<div class="mb-3">
+            <label class="form-label">CQE Feature</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="id_cqe_feature" name="cqe_feature" value="True">
+                <label class="form-check-label" for="id_cqe_feature">
+                    I would like to be featured in the CQE Annual Report.
+                </label>
+            </div>
+        </div>
+		<div class="mb-3">
+            <label for="id_resume" class="form-label">Resume/CV</label>
+            <input type="file" class="form-control" id="id_resume" name="resume" accept=".pdf,.doc,.docx">
+        </div>
+		<div class="mb-3">
+            <label class="form-label">Seeking Internships</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="id_seeking_internships" name="seeking_internships" value="True">
+                <label class="form-check-label" for="id_seeking_internships">
+                    I am seeking internship opportunities.
+                </label>
+            </div>
+        </div>
+		<div class="mb-3">
+            <label class="form-label">Seeking Positions</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="id_seeking_positions" name="seeking_positions" value="True">
+                <label class="form-check-label" for="id_seeking_positions">
+                    I am seeking job opportunities.
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+	</form>
+</div>
+{% endblock %}

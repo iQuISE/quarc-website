@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-section">
+	<h2>Logistics Form</h2>
+	<p> Please complete the logistics form for {{conference.year}}. This information will be matched with your existing registration using your email address.</p>
+	<ul>
+		{% for error in errors %}
+		{{error}}
+		{% endfor %}
+	</ul>
+	<form method="post" action="#">
+		{% csrf_token %}
+		<input type="hidden" name="landing_page" value="true">
+		{% if email_error %}
+		<div class="alert alert-danger">
+			<h5>Email Error</h5>
+			<p>{{ email_error }}</p>
+		</div>
+		{% endif %}
+		<div class="row mb-3">
+            <div class="col-md-12">
+				<label for="id_email" class="form-label">Email <span class="text-danger">*</span></label>
+				<input type="email" class="form-control" id="id_email" name="email" placeholder="Enter Email" value="{{attendee_email}}" required>
+                <small class="form-text text-muted">Enter the email address used during registration.</small>
+            </div>
+        </div>
+		<div class="text-center">
+            <button type="submit" class="btn btn-primary">Submit</button>
+		</div>
+	</form>
+</div>
+
+{% endblock %}

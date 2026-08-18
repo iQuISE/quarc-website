@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block content %}
+<div class="content-section">
+	<h2>About QuARC</h2>
+	<p>Welcome to the {{conference.ordinal|ordinal}} QSEC Annual Research Conference (<strong>QuARC</strong>) {{conference.year}}!</p>
+	<p><strong>QuARC</strong> {{conference.year}} will be held at the Omni Mount Washington resort in New Hampshire on {{ conference.start_date|date:"F jS" }} and {{ conference.end_date|date:"jS, Y" }}.</p>
+	<p><strong>QuARC</strong> – the QSEC's annual research conference – provides QSEC members an opportunity to engage with MIT students and faculty across the Institute and gain insight into their latest research.</p>
+	<p>This year's conference will feature Keynote Addresses from eminent figures at MIT and an industrial organization in quantum information science, as well as presentations and posters on the latest results from MIT faculty, students, and staff in quantum information science and engineering.</p>
+	<p><strong>QuARC</strong> {{conference.year}} is hosted by MIT's Center for Quantum Engineering (CQE) in partnership with MIT's Interdisciplinary Quantum Information Science and Engineering (iQuISE) student organization. We are delighted to welcome QSEC members to meet the CQE!</p>
+</div>
+<div class="content-section">
+	<div class="text-center mb-4">
+		<img src="/media/{{conference.homepage_image}}" alt="QUARC 2026 Conference" class="img-fluid rounded shadow" style="max-width: 100%; height: auto;">
+	</div>
+</div>
+<div class="content-section">
+	<p>Topics that are covered in <strong>QuARC</strong> {{conference.year}} are...</p>
+	<ul>
+		<li>Superconducting Quantum Systems</li>
+		<li>Solid-State Defect Engineering</li>
+		<li>Atomic, Molecular, and Optical Physics</li>
+		<li>Low-Dimensional Materials and Devices</li>
+		<li>Quantum Algorithms and Machine Learning</li>
+		<li>Quantum Sensing and Imaging</li>
+		<li>Optics and Photonics</li>
+	</ul>
+	<p><strong>NOTE</strong> that <strong>QuARC</strong> {{conference.year}} will be held in conjunction with <strong>MARC</strong> {{conference.year}}, which will take place on {{ conference.marc_start_date|date:"F jS" }} and {{ conference.marc_end_date|date:"jS, Y" }}. MIT students and faculty&mdash;as well as industry affiliates&mdash;are welcome and encouraged to attend both events and experience the diversity of research that MIT has to offer.</p>
+	<p>Students who are attending both <strong>QuARC</strong> and <strong>MARC</strong> are expected to submit a poster at <strong>QuARC</strong> and are highly encouraged to submit a poster to <strong>MARC</strong>. They may use the same poster for both events. <em>Students attending both <strong>QuARC</strong> and <strong>MARC</strong> must register for both events.</em></p>
+	<p>Please join us in advancing the academic and industrial frontiers of quantum science and engineering!</p>
+	<h2>Conference Highlights</h2>
+	<ul>
+		<li>Student pitches & poster sessions on research topics in quantum information science and engineering</li>
+		<li>Talks led by current industry professionals</li>
+		<li>Ski at the Mt. Washington Resort</li>
+		<li>Food provisions</li>
+		<li>Fun activities!</li>
+		<li>SWAG!</li>
+	</ul>
+</div>
+{% endblock %}
