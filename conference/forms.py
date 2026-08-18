@@ -1,4 +1,4 @@
-from django.forms import ModelForm, EmailField, ValidationError
+from django.forms import BooleanField, ModelForm, EmailField, ValidationError
 
 from conference.models import Attendee, Abstract, LogisticsMARC, LogisticsHousingPreferences, LogisticsDinner, LogisticsActivities, LogisticsSwag, LogisticsBus
 
@@ -43,12 +43,22 @@ class AbstractForm(ModelForm):
                   'resume',
                   'graduation_date']
 
-class LogisticsMARCForm(ModelForm):
+class LogisticsForm(ModelForm):
+    def clean(self):
+        '''Default bools to false, because checkboxes don't post'''
+        cleaned_data = super().clean()
+        for field_name, field in self.fields.items():
+            if isinstance(field, BooleanField) and not field.required:
+                if field_name not in self.data:
+                    cleaned_data[field_name] = False
+        return cleaned_data
+
+class LogisticsMARCForm(LogisticsForm):
     class Meta:
         model = LogisticsMARC
         fields = ['attending_marc']
 
-class LogisticsHousingPreferencesForm(ModelForm):
+class LogisticsHousingPreferencesForm(LogisticsForm):
     class Meta:
         model = LogisticsHousingPreferences
         fields = ['overnight_required',
@@ -57,7 +67,7 @@ class LogisticsHousingPreferencesForm(ModelForm):
                   'gender',
                   'preferred_roommate_gender']
 
-class LogisticsDinnerForm(ModelForm):
+class LogisticsDinnerForm(LogisticsForm):
     class Meta:
         model = LogisticsDinner
         fields = ['dinner_required',
@@ -69,17 +79,17 @@ class LogisticsDinnerForm(ModelForm):
                   'other_restriction',
                   'dinner_option']
 
-class LogisticsActivitiesForm(ModelForm):
+class LogisticsActivitiesForm(LogisticsForm):
     class Meta:
         model = LogisticsActivities
         fields = ['winter_activities']
 
-class LogisticsSwagForm(ModelForm):
+class LogisticsSwagForm(LogisticsForm):
     class Meta:
         model = LogisticsSwag
         fields = ['swag_option']
 
-class LogisticsBusForm(ModelForm):
+class LogisticsBusForm(LogisticsForm):
     class Meta:
         model = LogisticsBus
         fields = ['bus_to_required',
