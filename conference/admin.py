@@ -8,8 +8,44 @@ from .models import QuARCConference, QSECMember, QuARCQSECMembers, Attendee, Log
 import csv
 from datetime import datetime
 
+class QuARCFilter(admin.SimpleListFilter):
+    '''
+    Filters by QuARC year, defaulting to only showing most recent year.
+    '''
+    title = 'QuARC'
+    parameter_name = 'quarc'
+    filter_column = 'quarc__year'
+
+    def lookups(self, request, model_admin):
+        quarcs = QuARCConference.objects.order_by('-year')
+        options = [(q.year, q) for q in quarcs]
+        return [(None, 'Latest'), ('all', 'All')] + options
+
+
+    def choices(self, cl):
+        for lookup, title in self.lookup_choices:
+            yield {
+                'selected': self.value() == lookup,
+                'query_string': cl.get_query_string({
+                    self.parameter_name: lookup,
+                }, []),
+                'display': title,
+            }
+
+    def queryset(self, request, queryset):
+        if self.value() == 'all':
+            return queryset
+
+        quarcs = QuARCConference.objects
+        if self.value() == None:
+            year = quarcs.order_by('year').last().year
+        else:
+            year = self.value()
+
+        return queryset.filter(**{self.filter_column: year})
+
 class QuARCAdmin(admin.ModelAdmin):
-    list_filter = ['quarc__year']
+    list_filter = [QuARCFilter]
 
 def export_logistics_to_csv(modeladmin, request, queryset):
     '''
@@ -45,6 +81,9 @@ def export_logistics_to_csv(modeladmin, request, queryset):
         writer.writerow(data_row)
 
     return response
+
+class AttendeeQuARCFilter(QuARCFilter):
+    filter_column = 'attendee__quarc__year'
 
 class AcceptedFilter(admin.SimpleListFilter):
     title = 'Attendee Accepted'
@@ -97,7 +136,7 @@ class DroppedFilter(admin.SimpleListFilter):
         return queryset.filter(attendee__in=dropped_ids)
 
 class LogisticsAdmin(admin.ModelAdmin):
-    list_filter = ['attendee__quarc__year', AcceptedFilter, DroppedFilter]
+    list_filter = [AttendeeQuARCFilter, AcceptedFilter, DroppedFilter]
     readonly_fields = ['edit_time']
     actions = [export_logistics_to_csv]
 
@@ -158,8 +197,9 @@ class LogisticsAdmin(admin.ModelAdmin):
         request.current_app = self.admin_site.name
         return TemplateResponse(request, 'admin/history_view.html', context)
 
+
 class AbstractAdmin(admin.ModelAdmin):
-    list_filter = ['attendee__quarc__year', AcceptedFilter, DroppedFilter]
+    list_filter = [AttendeeQuARCFilter, AcceptedFilter, DroppedFilter]
 
 admin.site.register(QuARCConference)
 admin.site.register(QSECMember)
