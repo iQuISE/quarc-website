@@ -48,7 +48,7 @@ class Attendee(models.Model):
     affiliation = models.CharField(max_length=64, blank=True)
 
     def __str__(self):
-        return 'QuARC %d, %s %s' % (self.quarc.year, self.first_name, self.last_name)
+        return '%s %s' % (self.first_name, self.last_name)
 
     def validate_unique(self, exclude=None):
         # Same email and conference
@@ -68,11 +68,11 @@ class LogisticsMARC(LogisticsModel):
 
     def __str__(self):
         if self.attending_marc:
-            return ('QuARC %d, %s %s is attending MARC'
-                    % (self.attendee.quarc.year, self.attendee.first_name, self.attendee.last_name))
+            return ('%s %s is attending MARC'
+                    % (self.attendee.first_name, self.attendee.last_name))
         else:
-            return ('QuARC %d, %s %s is not attending MARC'
-                    % (self.attendee.quarc.year, self.attendee.first_name, self.attendee.last_name))
+            return ('%s %s is not attending MARC'
+                    % (self.attendee.first_name, self.attendee.last_name))
 
     class Meta:
         verbose_name = 'MARC Logistics'
@@ -88,7 +88,7 @@ class LogisticsHousingPreferences(LogisticsModel):
     preferred_roommate_gender = models.CharField(max_length=32, blank=True)
 
     def __str__(self):
-        return 'QuARC %d, %s %s' % (self.attendee.quarc.year, self.attendee.first_name, self.attendee.last_name)
+        return '%s %s' % (self.attendee.first_name, self.attendee.last_name)
 
     class Meta:
         verbose_name = 'Housing Preferences Logistics'
@@ -99,8 +99,8 @@ class LogisticsHousingAssignments(LogisticsModel):
                                  related_name='assigned_roommate')
 
     def __str__(self):
-        return ('QuARC %d, %s %s and %s %s'
-                % (self.attendee.quarc.year, self.attendee.first_name, self.attendee.last_name,
+        return ('%s %s and %s %s'
+                % (self.attendee.first_name, self.attendee.last_name,
                    self.roommate.first_name, self.roommate.last_name))
 
     class Meta:
@@ -119,7 +119,7 @@ class DinnerOptions(models.Model):
     option = models.CharField(max_length=32, blank=False)
 
     def __str__(self):
-        return '%s for QuARC %d' % (self.option, self.quarc.year)
+        return '%s' % (self.option)
 
     class Meta:
         verbose_name = 'Dinner Option'
@@ -136,7 +136,7 @@ class LogisticsDinner(LogisticsModel):
     dinner_option = models.ForeignKey(DinnerOptions, null=True, on_delete=models.SET_NULL, blank=True)
 
     def __str__(self):
-        return 'QuARC %d, %s %s' % (self.attendee.quarc.year, self.attendee.first_name, self.attendee.last_name)
+        return '%s %s' % (self.attendee.first_name, self.attendee.last_name)
 
     class Meta:
         verbose_name = 'Dinner Logistics'
@@ -146,7 +146,7 @@ class LogisticsActivities(LogisticsModel):
     winter_activities = models.BooleanField(null=False)
 
     def __str__(self):
-        return 'QuARC %d, %s %s' % (self.attendee.quarc.year, self.attendee.first_name, self.attendee.last_name)
+        return '%s %s' % (self.attendee.first_name, self.attendee.last_name)
 
     class Meta:
         verbose_name = 'Winter Activities Logistics'
@@ -158,7 +158,7 @@ class SwagOptions(models.Model):
     url = models.CharField(max_length=32, blank=True)
 
     def __str__(self):
-        return '%s for QuARC %d' % (self.option, self.quarc.year)
+        return '%s' % (self.option)
 
     class Meta:
         verbose_name = 'Swag Option'
@@ -168,7 +168,7 @@ class LogisticsSwag(LogisticsModel):
     swag_option = models.ForeignKey(SwagOptions, null=False, on_delete=models.CASCADE)
 
     def __str__(self):
-        return 'QuARC %d, %s %s' % (self.attendee.quarc.year, self.attendee.first_name, self.attendee.last_name)
+        return '%s %s: %s' % (self.attendee.first_name, self.attendee.last_name, self.swag_option.option)
 
     class Meta:
         verbose_name = 'Swag Logistics'
@@ -184,20 +184,19 @@ class LogisticsBus(LogisticsModel):
     bus_from_required = models.BooleanField(null=False)
 
     def __str__(self):
-        return 'QuARC %d, %s %s' % (self.attendee.quarc.year, self.attendee.first_name, self.attendee.last_name)
+        return '%s %s' % (self.attendee.first_name, self.attendee.last_name)
 
     class Meta:
         verbose_name = 'Bus Logistics'
         verbose_name_plural = 'Bus Logistics'
 
 class Acceptance(LogisticsModel):
-    attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
     accepted = models.BooleanField(null=False)
     acceptance_note = models.CharField(max_length=256, blank=True)
     dropped = models.BooleanField(null=True)
 
     def __str__(self):
-        return 'QuARC %d, %s %s' % (self.attendee.quarc.year, self.attendee.first_name, self.attendee.last_name)
+        return '%s %s' % (self.attendee.first_name, self.attendee.last_name)
 
 class Abstract(models.Model):    
     attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
@@ -219,7 +218,7 @@ class Abstract(models.Model):
     graduation_date = models.DateField(null=True)
 
     def __str__(self):
-        return 'QuARC %d, %s %s' % (self.attendee.quarc.year, self.attendee.first_name, self.attendee.last_name)
+        return '%s %s' % (self.attendee.first_name, self.attendee.last_name)
 
 class QSECMember(models.Model):
     company_name = models.CharField(max_length=64, blank=False)

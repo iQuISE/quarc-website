@@ -1,17 +1,105 @@
 from django.contrib import admin
 from django.db import models
+from django.http import HttpResponse
 from django.template.response import TemplateResponse
 
 from .models import QuARCConference, QSECMember, QuARCQSECMembers, Attendee, LogisticsMARC, LogisticsHousingPreferences, LogisticsHousingAssignments, DinnerOptions, LogisticsDinner, LogisticsActivities, SwagOptions, LogisticsSwag, LogisticsBus, Acceptance, Abstract
 
+import csv
 from datetime import datetime
 
 class QuARCAdmin(admin.ModelAdmin):
     list_filter = ['quarc__year']
 
+def export_logistics_to_csv(modeladmin, request, queryset):
+    '''
+    Export a LogisticsAdmin to a csv file
+    '''
+    RM_FIELDS = ['ID', 'attendee', 'edit_time']
+    opts = modeladmin.model._meta
+    filename = opts.verbose_name
+    response = HttpResponse(content_type='text/csv',
+                            headers={"Content-Disposition": f'attachment; filename="{filename}.csv"'})
+    writer = csv.writer(response)
+
+    attendee_fields = [Attendee._meta.get_field('first_name'),
+                       Attendee._meta.get_field('last_name'),
+                       Attendee._meta.get_field('email')]
+    fields = [field for field in opts.get_fields() if not field.many_to_many and not field.one_to_many]
+    fields = [field for field in fields if field.name not in RM_FIELDS]
+    # Write a first row with header information
+    writer.writerow([field.verbose_name for field in attendee_fields + fields])
+    # Write data rows
+    for obj in queryset:
+        data_row = []
+        for field in attendee_fields:
+            value = getattr(obj.attendee, field.name)
+            if isinstance(value, datetime):
+                value = value.strftime('%Y-%m-%d')
+            data_row.append(value)
+        for field in fields:
+            value = getattr(obj, field.name)
+            if isinstance(value, datetime):
+                value = value.strftime('%Y-%m-%d')
+            data_row.append(value)
+        writer.writerow(data_row)
+
+    return response
+
+class AcceptedFilter(admin.SimpleListFilter):
+    title = 'Attendee Accepted'
+    parameter_name = 'accepted'
+
+    def lookups(self, request, model_admin):
+        return [('accepted', 'Accepted'), ('rejected', 'Rejected'), ('null', 'No decision')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'accepted':
+            accept_type = True
+        elif self.value() == 'rejected':
+            accept_type = False
+        elif self.value() == 'null':
+            accept_type = None
+        else:
+            return queryset
+
+        latest_edit_time = (Acceptance.objects.filter(attendee=models.OuterRef('attendee_id'))
+                            .order_by('-edit_time').values('edit_time')[:1])
+        accepted_ids = (Acceptance.objects.annotate(latest_edit_time=models.Subquery(latest_edit_time))
+                                                    .filter(edit_time=models.F('latest_edit_time'))
+                                                    .filter(accepted=accept_type)
+                                                    .values('attendee_id'))
+        return queryset.filter(attendee__in=accepted_ids)
+
+class DroppedFilter(admin.SimpleListFilter):
+    title = 'Attendee Dropped'
+    parameter_name = 'dropped'
+
+    def lookups(self, request, model_admin):
+        return [('attending', 'Attending'), ('dropped', 'Dropped'), ('null', 'No decision')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'attending':
+            drop_type = False
+        elif self.value() == 'dropped':
+            drop_type = True
+        elif self.value() == 'null':
+            drop_type = None
+        else:
+            return queryset
+
+        latest_edit_time = (Acceptance.objects.filter(attendee=models.OuterRef('attendee_id'))
+                            .order_by('-edit_time').values('edit_time')[:1])
+        dropped_ids = (Acceptance.objects.annotate(latest_edit_time=models.Subquery(latest_edit_time))
+                                                    .filter(edit_time=models.F('latest_edit_time'))
+                                                    .filter(dropped=drop_type)
+                                                    .values('attendee_id'))
+        return queryset.filter(attendee__in=dropped_ids)
+
 class LogisticsAdmin(admin.ModelAdmin):
-    list_filter = ['attendee__quarc__year']
+    list_filter = ['attendee__quarc__year', AcceptedFilter, DroppedFilter]
     readonly_fields = ['edit_time']
+    actions = [export_logistics_to_csv]
 
     def save_model(self, request, obj, form, change):
         '''
@@ -61,28 +149,17 @@ class LogisticsAdmin(admin.ModelAdmin):
         page_range = paginator.get_elided_page_range(page_obj.number)
 
         context = {
-            **self.admin_site.each_context(request),
-            'title': f'Change history: {obj.attendee}',
-            'fields': field_names,
-            'action_list': page_obj,
-            'page_range': page_range,
-            'age_var': PAGE_VAR,
-            'pagination_required': paginator.count > 100,
-            'module_name': self.opts.verbose_name_plural,
-            'object': obj,
-            'opts': self.opts,
+            **self.admin_site.each_context(request), 'title': f'Change history: {obj.attendee}',
+            'fields': field_names, 'action_list': page_obj,
+            'page_range': page_range, 'page_var': PAGE_VAR, 'pagination_required': paginator.count > 100,
+            'module_name': self.opts.verbose_name_plural, 'object': obj, 'opts': self.opts,
         }
 
         request.current_app = self.admin_site.name
-
-        return TemplateResponse(
-            request,
-            'admin/history_view.html',
-            context,
-        )
+        return TemplateResponse(request, 'admin/history_view.html', context)
 
 class AbstractAdmin(admin.ModelAdmin):
-    list_filter = ['attendee__quarc__year', 'accepted', 'dropped']
+    list_filter = ['attendee__quarc__year', AcceptedFilter, DroppedFilter]
 
 admin.site.register(QuARCConference)
 admin.site.register(QSECMember)
