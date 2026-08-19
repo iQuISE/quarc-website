@@ -69,11 +69,12 @@ def registration_abstract_submission(request, year):
 
             marc_form.instance.attendee = attendee
             marc_form.instance.edit_time = datetime.now()
+            marc_form.instance.latest = True
 
             abstract_form.instance.attendee = attendee
 
             if marc_form.is_valid() and abstract_form.is_valid():
-                attendee_form.save()
+                attendee = attendee_form.save()
                 marc_form.save()
                 abstract_form.save()
                 return render(request, 'registration_success.html',
@@ -110,6 +111,7 @@ def registration_university_industry(request, year):
 
             marc_form.instance.attendee = attendee
             marc_form.instance.edit_time = datetime.now()
+            marc_form.instance.latest = True
 
             if marc_form.is_valid():
                 attendee_form.save()
@@ -220,6 +222,7 @@ def logistics_page(request, year):
             for form in all_forms:
                 form.instance.attendee = attendee
                 form.instance.edit_time = datetime.now()
+                form.instance.latest = True
 
             if all([form.is_valid() for form in all_forms]):
                 for form in all_forms:

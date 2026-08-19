@@ -1,4 +1,4 @@
-from django.forms import BooleanField, ModelForm, EmailField, ValidationError
+from django.forms import BooleanField, ModelForm, EmailField, ValidationError, CharField, Textarea
 
 from conference.models import Attendee, Abstract, LogisticsMARC, LogisticsHousingPreferences, LogisticsDinner, LogisticsActivities, LogisticsSwag, LogisticsBus
 
@@ -42,6 +42,8 @@ class AbstractForm(ModelForm):
                   'cqe_feature',
                   'resume',
                   'graduation_date']
+
+    abstract = CharField(widget=Textarea(attrs={'cols': 80, 'rows': 5}))
 
 class LogisticsForm(ModelForm):
     def clean(self):

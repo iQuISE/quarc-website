@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.template.response import TemplateResponse
 
 from .models import QuARCConference, QSECMember, QuARCQSECMembers, Attendee, LogisticsMARC, LogisticsHousingPreferences, LogisticsHousingAssignments, DinnerOptions, LogisticsDinner, LogisticsActivities, SwagOptions, LogisticsSwag, LogisticsBus, Acceptance, Abstract
+from .forms import AbstractForm
 
 import csv
 from datetime import datetime
@@ -49,9 +50,6 @@ class QuARCAdmin(admin.ModelAdmin):
 
 @admin.action(description="Add QSEC members to QuARC conference")
 def add_qsec_to_quarc(modeladmin, request, queryset):
-    '''
-    Adds multiple QSEC members to a QuARC conference.
-    '''
     if 'post' in request.POST:
         # Second call to this form, so we can now add the QSEC members
         quarc = QuARCConference.objects.filter(year=int(request.POST['quarc']))[0]
@@ -70,10 +68,11 @@ def add_qsec_to_quarc(modeladmin, request, queryset):
 
     return TemplateResponse(request, 'admin/add_qsec_view.html', context)
 
+class QuARCQSECMembersAdmin(admin.ModelAdmin):
+    actions = [add_qsec_to_quarc]
+
+@admin.action(description="Export logistics to CSV")
 def export_logistics_to_csv(modeladmin, request, queryset):
-    '''
-    Export a LogisticsAdmin to a csv file
-    '''
     RM_FIELDS = ['ID', 'attendee', 'edit_time']
     opts = modeladmin.model._meta
     filename = opts.verbose_name
@@ -111,6 +110,7 @@ class AttendeeQuARCFilter(QuARCFilter):
 class AcceptedFilter(admin.SimpleListFilter):
     title = 'Attendee Accepted'
     parameter_name = 'accepted'
+    filter_param = 'attendee__in'
 
     def lookups(self, request, model_admin):
         return [('accepted', 'Accepted'), ('rejected', 'Rejected'), ('null', 'No decision')]
@@ -122,20 +122,18 @@ class AcceptedFilter(admin.SimpleListFilter):
             accept_type = False
         elif self.value() == 'null':
             accept_type = None
+            accepted_ids = Acceptance.objects.values('attendee_id')
+            return queryset.filter(~models.Q(**{self.filter_param: accepted_ids}))
         else:
             return queryset
 
-        latest_edit_time = (Acceptance.objects.filter(attendee=models.OuterRef('attendee_id'))
-                            .order_by('-edit_time').values('edit_time')[:1])
-        accepted_ids = (Acceptance.objects.annotate(latest_edit_time=models.Subquery(latest_edit_time))
-                                                    .filter(edit_time=models.F('latest_edit_time'))
-                                                    .filter(accepted=accept_type)
-                                                    .values('attendee_id'))
-        return queryset.filter(attendee__in=accepted_ids)
+        accepted_ids = Acceptance.objects.filter(latest=True, accepted=accept_type).values('attendee_id')
+        return queryset.filter(**{self.filter_param: accepted_ids})
 
 class DroppedFilter(admin.SimpleListFilter):
     title = 'Attendee Dropped'
     parameter_name = 'dropped'
+    filter_param = 'attendee__in'
 
     def lookups(self, request, model_admin):
         return [('attending', 'Attending'), ('dropped', 'Dropped'), ('null', 'No decision')]
@@ -150,38 +148,37 @@ class DroppedFilter(admin.SimpleListFilter):
         else:
             return queryset
 
-        latest_edit_time = (Acceptance.objects.filter(attendee=models.OuterRef('attendee_id'))
-                            .order_by('-edit_time').values('edit_time')[:1])
-        dropped_ids = (Acceptance.objects.annotate(latest_edit_time=models.Subquery(latest_edit_time))
-                                                    .filter(edit_time=models.F('latest_edit_time'))
-                                                    .filter(dropped=drop_type)
-                                                    .values('attendee_id'))
-        return queryset.filter(attendee__in=dropped_ids)
+        dropped_ids = Acceptance.objects.filter(latest=True, dropped=drop_type).values('attendee_id')
+        return queryset.filter(**{self.filter_param: accepted_ids})
+
+class LatestFilter(admin.SimpleListFilter):
+    title = 'Latest Logistics'
+    parameter_name = 'latest'
+
+    def lookups(self, request, model_admin):
+        return [(None, 'Latest'), ('all', 'All'), ('stale', 'Stale')]
+
+    def choices(self, cl):
+        for lookup, title in self.lookup_choices:
+            yield {
+                'selected': self.value() == lookup,
+                'query_string': cl.get_query_string({
+                    self.parameter_name: lookup,
+                }, []),
+                'display': title,
+            }
+
+    def queryset(self, request, queryset):
+        if self.value() == 'all':
+            return queryset
+        elif self.value() == 'stale':
+            return queryset.filter(latest=False)
+        return queryset.filter(latest=True)
 
 class LogisticsAdmin(admin.ModelAdmin):
-    list_filter = [AttendeeQuARCFilter, AcceptedFilter, DroppedFilter]
-    readonly_fields = ['edit_time']
+    list_filter = [AttendeeQuARCFilter, LatestFilter, AcceptedFilter, DroppedFilter]
+    readonly_fields = ['attendee', 'latest', 'edit_time']
     actions = [export_logistics_to_csv]
-
-    def save_model(self, request, obj, form, change):
-        '''
-        We want to keep a record of logistics changes,
-        so we delete the primary key to ensure a new entry is created.
-        '''
-        if len(form.changed_data) > 0:
-            obj.pk = None
-            obj.edit_time = datetime.now()
-        super().save_model(request, obj, form, change)
-
-    def get_queryset(self, request):
-        '''
-        We want to list only the latest logistics for each attendee.
-        The current method is pretty inefficient, but there doesn't seem to be a way to implement inner joins in Django.
-        '''
-        qs = super().get_queryset(request)
-        latest_edit_time = (qs.filter(attendee=models.OuterRef('attendee_id'))
-                            .order_by('-edit_time').values('edit_time')[:1])
-        return qs.annotate(latest_edit_time=models.Subquery(latest_edit_time)).filter(edit_time=models.F('latest_edit_time'))
 
     def history_view(self, request, object_id, extra_context=None):
         "The 'history' admin view for this model."
@@ -220,17 +217,74 @@ class LogisticsAdmin(admin.ModelAdmin):
         request.current_app = self.admin_site.name
         return TemplateResponse(request, 'admin/history_view.html', context)
 
+def add_attendee_acceptance(modeladmin, request, queryset, accepted):
+    Acceptance.objects.filter(attendee__in=queryset.all()).update(latest=False)
+    for attendee in queryset.all():
+        Acceptance.objects.create(attendee=attendee, latest=True, edit_time=datetime.now(),
+                                  accepted=accepted)
+@admin.action(description="Accept attendees")
+def accept_attendees(modeladmin, request, queryset):
+    add_attendee_acceptance(modeladmin, request, queryset, True)
+@admin.action(description="Reject attendees")
+def reject_attendees(modeladmin, request, queryset):
+    add_attendee_acceptance(modeladmin, request, queryset, False)
+
+class AttendeeAcceptedFilter(AcceptedFilter):
+    filter_param = 'pk__in'
+class AttendeeDroppedFilter(DroppedFilter):
+    filter_param = 'pk__in'
+
+class AttendeeAbstractInline(admin.StackedInline):
+    extra = 0
+    max_num = 0 # Don't create an abstract
+    show_change_link = True
+    exclude = ('author_list', 'funding_sources', 'publications', 'figure', 'figure_caption',
+               'seeking_internships', 'seeking_positions', 'elevator_pitch', 'oral_presentation',
+               'cqe_feature', 'resume', 'graduation_date')
+    readonly_fields = ('title', 'abstract', 'research_group')
+    model = Abstract
+
+class AttendeeLogisticsInline(admin.TabularInline):
+    extra = 0
+    max_num = 1 # Edit existing, unless it doesn't exist
+    show_change_link = True
+    exclude = ('latest',)
+    readonly_fields = ('edit_time',)
+
+    def get_queryset(self, request):
+        '''We want to list only the latest logistics for each attendee.'''
+        return super().get_queryset(request).filter(latest=True)
+
+class AttendeeAcceptanceInline(AttendeeLogisticsInline):
+    model = Acceptance
+class AttendeeLogisticsMARCInline(AttendeeLogisticsInline):
+    model = LogisticsMARC
+class AttendeeLogisticsDinnerInline(AttendeeLogisticsInline):
+    model = LogisticsDinner
+class AttendeeLogisticsActivitiesInline(AttendeeLogisticsInline):
+    model = LogisticsActivities
+class AttendeeLogisticsSwagInline(AttendeeLogisticsInline):
+    model = LogisticsSwag
+class AttendeeLogisticsBusInline(AttendeeLogisticsInline):
+    model = LogisticsBus
+
+class AttendeeAdmin(admin.ModelAdmin):
+    list_filter = [QuARCFilter, AttendeeAcceptedFilter, AttendeeDroppedFilter]
+    actions = [accept_attendees, reject_attendees]
+    inlines = (AttendeeAbstractInline, AttendeeAcceptanceInline, AttendeeLogisticsMARCInline,
+               AttendeeLogisticsDinnerInline, AttendeeLogisticsActivitiesInline,
+               AttendeeLogisticsSwagInline, AttendeeLogisticsBusInline,)
 
 class AbstractAdmin(admin.ModelAdmin):
     list_filter = [AttendeeQuARCFilter, AcceptedFilter, DroppedFilter]
+    readonly_fields = ('attendee',)
+    form = AbstractForm
 
 admin.site.register(QuARCConference)
-class QuARCQSECMembersAdmin(admin.ModelAdmin):
-    actions = [add_qsec_to_quarc]
 admin.site.register(QSECMember, QuARCQSECMembersAdmin)
 admin.site.register(QuARCQSECMembers, QuARCAdmin)
 
-admin.site.register(Attendee, QuARCAdmin)
+admin.site.register(Attendee, AttendeeAdmin)
 admin.site.register(LogisticsMARC, LogisticsAdmin)
 admin.site.register(LogisticsHousingPreferences, LogisticsAdmin)
 admin.site.register(LogisticsHousingAssignments, LogisticsAdmin)

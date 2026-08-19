@@ -3,6 +3,8 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+from datetime import datetime
+
 class QuARCConference(models.Model):
     year = models.IntegerField(validators=[MinValueValidator(2000),
                                            MaxValueValidator(2100)], unique=True)
@@ -59,9 +61,37 @@ class Attendee(models.Model):
 class LogisticsModel(models.Model):
     attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
     edit_time = models.DateTimeField()
+    latest = models.BooleanField(null=False, blank=False)
 
     class Meta:
         abstract = True
+
+    def validate_unique(self, exclude=None):
+        if self.latest:
+            # Ensure there is only one latest entry.
+            conflict = self.__class__.objects.filter(attendee=self.attendee, latest=True).exclude(pk=self.pk)
+            if conflict.exists():
+                raise ValidationError('{} already has latest entry.'.format(self.attendee))
+
+    def save(self, *args, **kwargs):
+        # If unchanged and latest, just keep it
+        if self.pk is not None and self.latest:
+            db_objs = self.__class__.objects.filter(pk=self.pk)
+            if len(db_objs) > 0:
+                matched = True
+                for field in self._meta.get_fields():
+                    if getattr(self, field.name) != getattr(db_objs[0], field.name):
+                        matched = False
+                        continue
+                if matched:
+                    super().save(*args, **kwargs)
+                    return
+        # Otherwise, mark others not the latest and ensure new entry created.
+        self.__class__.objects.filter(attendee=self.attendee).update(latest=False)
+        self.pk = None # Ensure new entry is created
+        self.latest = True
+        self.edit_time = datetime.now()
+        super().save(*args, **kwargs)
 
 class LogisticsMARC(LogisticsModel):
     attending_marc = models.BooleanField(null=True)
