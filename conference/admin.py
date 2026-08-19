@@ -47,6 +47,29 @@ class QuARCFilter(admin.SimpleListFilter):
 class QuARCAdmin(admin.ModelAdmin):
     list_filter = [QuARCFilter]
 
+@admin.action(description="Add QSEC members to QuARC conference")
+def add_qsec_to_quarc(modeladmin, request, queryset):
+    '''
+    Adds multiple QSEC members to a QuARC conference.
+    '''
+    if 'post' in request.POST:
+        # Second call to this form, so we can now add the QSEC members
+        quarc = QuARCConference.objects.filter(year=int(request.POST['quarc']))[0]
+        for qsec_member in queryset:
+            QuARCQSECMembers.objects.create(quarc=quarc, qsec_member=qsec_member)
+        return None
+
+    quarcs = QuARCConference.objects.order_by('year')
+
+    context = {
+        **modeladmin.admin_site.each_context(request), 'title': f'Add QSEC to QuARC',
+        'action_checkbox_name': admin.helpers.ACTION_CHECKBOX_NAME,
+        'queryset': queryset, 'quarcs': quarcs,
+        'module_name': modeladmin.opts.verbose_name_plural, 'opts': modeladmin.opts
+    }
+
+    return TemplateResponse(request, 'admin/add_qsec_view.html', context)
+
 def export_logistics_to_csv(modeladmin, request, queryset):
     '''
     Export a LogisticsAdmin to a csv file
@@ -202,7 +225,9 @@ class AbstractAdmin(admin.ModelAdmin):
     list_filter = [AttendeeQuARCFilter, AcceptedFilter, DroppedFilter]
 
 admin.site.register(QuARCConference)
-admin.site.register(QSECMember)
+class QuARCQSECMembersAdmin(admin.ModelAdmin):
+    actions = [add_qsec_to_quarc]
+admin.site.register(QSECMember, QuARCQSECMembersAdmin)
 admin.site.register(QuARCQSECMembers, QuARCAdmin)
 
 admin.site.register(Attendee, QuARCAdmin)
