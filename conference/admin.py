@@ -1,52 +1,24 @@
 from django.contrib import admin
 from django.db import models
-from django.http import HttpResponse
 from django.template.response import TemplateResponse
 
-from .models import QuARCConference, QSECMember, QuARCQSECMembers, Attendee, LogisticsMARC, LogisticsHousingPreferences, LogisticsHousingAssignments, DinnerOptions, LogisticsDinner, LogisticsActivities, SwagOptions, LogisticsSwag, LogisticsBus, Acceptance, Abstract
-from .forms import AbstractForm
+from conference.models import QuARCConference, QSECMember, QuARCQSECMembers, Attendee, Abstract
+from conference.forms import AbstractForm
+from conference.admin_filters import *
 
-import csv
+from logistics.models import Acceptance, MARC, HousingPreferences, HousingAssignments, Dinner, Activities, Swag, Bus
+from logistics.admin_filters import AttendeeQuARCFilter, AcceptedFilter, DroppedFilter
+
 from datetime import datetime
 
-class QuARCFilter(admin.SimpleListFilter):
-    '''
-    Filters by QuARC year, defaulting to only showing most recent year.
-    '''
-    title = 'QuARC'
-    parameter_name = 'quarc'
-    filter_column = 'quarc__year'
-
-    def lookups(self, request, model_admin):
-        quarcs = QuARCConference.objects.order_by('-year')
-        options = [(q.year, q) for q in quarcs]
-        return [(None, 'Latest'), ('all', 'All')] + options
-
-
-    def choices(self, cl):
-        for lookup, title in self.lookup_choices:
-            yield {
-                'selected': self.value() == lookup,
-                'query_string': cl.get_query_string({
-                    self.parameter_name: lookup,
-                }, []),
-                'display': title,
-            }
-
-    def queryset(self, request, queryset):
-        if self.value() == 'all':
-            return queryset
-
-        quarcs = QuARCConference.objects
-        if self.value() == None:
-            year = quarcs.order_by('year').last().year
-        else:
-            year = self.value()
-
-        return queryset.filter(**{self.filter_column: year})
+# The admin panel for creating and managing conference objects
+admin.site.register(QuARCConference)
 
 class QuARCAdmin(admin.ModelAdmin):
     list_filter = [QuARCFilter]
+
+# For associating QSEC, Dinner, and Swag with a conference
+admin.site.register(QuARCQSECMembers, QuARCAdmin)
 
 @admin.action(description="Add QSEC members to QuARC conference")
 def add_qsec_to_quarc(modeladmin, request, queryset):
@@ -71,151 +43,8 @@ def add_qsec_to_quarc(modeladmin, request, queryset):
 class QuARCQSECMembersAdmin(admin.ModelAdmin):
     actions = [add_qsec_to_quarc]
 
-@admin.action(description="Export logistics to CSV")
-def export_logistics_to_csv(modeladmin, request, queryset):
-    RM_FIELDS = ['ID', 'attendee', 'edit_time']
-    opts = modeladmin.model._meta
-    filename = opts.verbose_name
-    response = HttpResponse(content_type='text/csv',
-                            headers={"Content-Disposition": f'attachment; filename="{filename}.csv"'})
-    writer = csv.writer(response)
-
-    attendee_fields = [Attendee._meta.get_field('first_name'),
-                       Attendee._meta.get_field('last_name'),
-                       Attendee._meta.get_field('email')]
-    fields = [field for field in opts.get_fields() if not field.many_to_many and not field.one_to_many]
-    fields = [field for field in fields if field.name not in RM_FIELDS]
-    # Write a first row with header information
-    writer.writerow([field.verbose_name for field in attendee_fields + fields])
-    # Write data rows
-    for obj in queryset:
-        data_row = []
-        for field in attendee_fields:
-            value = getattr(obj.attendee, field.name)
-            if isinstance(value, datetime):
-                value = value.strftime('%Y-%m-%d')
-            data_row.append(value)
-        for field in fields:
-            value = getattr(obj, field.name)
-            if isinstance(value, datetime):
-                value = value.strftime('%Y-%m-%d')
-            data_row.append(value)
-        writer.writerow(data_row)
-
-    return response
-
-class AttendeeQuARCFilter(QuARCFilter):
-    filter_column = 'attendee__quarc__year'
-
-class AcceptedFilter(admin.SimpleListFilter):
-    title = 'Attendee Accepted'
-    parameter_name = 'accepted'
-    filter_param = 'attendee__in'
-
-    def lookups(self, request, model_admin):
-        return [('accepted', 'Accepted'), ('rejected', 'Rejected'), ('null', 'No decision')]
-
-    def queryset(self, request, queryset):
-        if self.value() == 'accepted':
-            accept_type = True
-        elif self.value() == 'rejected':
-            accept_type = False
-        elif self.value() == 'null':
-            accept_type = None
-            accepted_ids = Acceptance.objects.values('attendee_id')
-            return queryset.filter(~models.Q(**{self.filter_param: accepted_ids}))
-        else:
-            return queryset
-
-        accepted_ids = Acceptance.objects.filter(latest=True, accepted=accept_type).values('attendee_id')
-        return queryset.filter(**{self.filter_param: accepted_ids})
-
-class DroppedFilter(admin.SimpleListFilter):
-    title = 'Attendee Dropped'
-    parameter_name = 'dropped'
-    filter_param = 'attendee__in'
-
-    def lookups(self, request, model_admin):
-        return [('attending', 'Attending'), ('dropped', 'Dropped'), ('null', 'No decision')]
-
-    def queryset(self, request, queryset):
-        if self.value() == 'attending':
-            drop_type = False
-        elif self.value() == 'dropped':
-            drop_type = True
-        elif self.value() == 'null':
-            drop_type = None
-        else:
-            return queryset
-
-        dropped_ids = Acceptance.objects.filter(latest=True, dropped=drop_type).values('attendee_id')
-        return queryset.filter(**{self.filter_param: accepted_ids})
-
-class LatestFilter(admin.SimpleListFilter):
-    title = 'Latest Logistics'
-    parameter_name = 'latest'
-
-    def lookups(self, request, model_admin):
-        return [(None, 'Latest'), ('all', 'All'), ('stale', 'Stale')]
-
-    def choices(self, cl):
-        for lookup, title in self.lookup_choices:
-            yield {
-                'selected': self.value() == lookup,
-                'query_string': cl.get_query_string({
-                    self.parameter_name: lookup,
-                }, []),
-                'display': title,
-            }
-
-    def queryset(self, request, queryset):
-        if self.value() == 'all':
-            return queryset
-        elif self.value() == 'stale':
-            return queryset.filter(latest=False)
-        return queryset.filter(latest=True)
-
-class LogisticsAdmin(admin.ModelAdmin):
-    list_filter = [AttendeeQuARCFilter, LatestFilter, AcceptedFilter, DroppedFilter]
-    readonly_fields = ['attendee', 'latest', 'edit_time']
-    actions = [export_logistics_to_csv]
-
-    def history_view(self, request, object_id, extra_context=None):
-        "The 'history' admin view for this model."
-        from django.contrib.admin.views.main import PAGE_VAR
-
-        model = self.model
-        obj = self.get_object(request, admin.utils.unquote(object_id))
-        if obj is None:
-            return self._get_obj_does_not_exist_redirect(
-                request, model._meta, object_id
-            )
-
-        if not self.has_view_or_change_permission(request, obj):
-            raise PermissionDenied
-
-        fields = self.model._meta.fields
-        action_list = self.model.objects.filter(attendee=obj.attendee).order_by('edit_time')
-
-        field_names = [field.name.split('.')[-1] for field in fields]
-
-        action_list_str = [[str(getattr(action, field)) for field in field_names]
-                           for action in action_list]
-
-        paginator = self.get_paginator(request, action_list_str, 100)
-        page_number = request.GET.get(PAGE_VAR, 1)
-        page_obj = paginator.get_page(page_number)
-        page_range = paginator.get_elided_page_range(page_obj.number)
-
-        context = {
-            **self.admin_site.each_context(request), 'title': f'Change history: {obj.attendee}',
-            'fields': field_names, 'action_list': page_obj,
-            'page_range': page_range, 'page_var': PAGE_VAR, 'pagination_required': paginator.count > 100,
-            'module_name': self.opts.verbose_name_plural, 'object': obj, 'opts': self.opts,
-        }
-
-        request.current_app = self.admin_site.name
-        return TemplateResponse(request, 'admin/history_view.html', context)
+# For storing QSEC members; also has a function to associate them to a QuARC
+admin.site.register(QSECMember, QuARCQSECMembersAdmin)
 
 def add_attendee_acceptance(modeladmin, request, queryset, accepted):
     Acceptance.objects.filter(attendee__in=queryset.all()).update(latest=False)
@@ -233,6 +62,43 @@ class AttendeeAcceptedFilter(AcceptedFilter):
     filter_param = 'pk__in'
 class AttendeeDroppedFilter(DroppedFilter):
     filter_param = 'pk__in'
+
+class AttendeeLogisticsFilter(admin.SimpleListFilter):
+    title = 'Logistics'
+    parameter_name = 'Logistics'
+
+    def lookups(self, request, model_admin):
+        return [('complete', 'Complete'), ('partial', 'Partial'), ('none', 'None')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'complete':
+            ids = []
+            ids.append(HousingPreferences.objects.filter(latest=True).values('attendee_id'))
+            ids.append(Dinner.objects.filter(latest=True).values('attendee_id'))
+            ids.append(Activities.objects.filter(latest=True).values('attendee_id'))
+            ids.append(Swag.objects.filter(latest=True).values('attendee_id'))
+            ids.append(Bus.objects.filter(latest=True).values('attendee_id'))
+            return queryset.filter(**{'pk__in': id_list for id_list in ids})
+        elif self.value() == 'partial':
+            ids = []
+            ids += HousingPreferences.objects.filter(latest=True).values_list('attendee_id', flat=True)
+            ids += Dinner.objects.filter(latest=True).values_list('attendee_id', flat=True)
+            ids += Activities.objects.filter(latest=True).values_list('attendee_id', flat=True)
+            ids += Swag.objects.filter(latest=True).values_list('attendee_id', flat=True)
+            ids += Bus.objects.filter(latest=True).values_list('attendee_id', flat=True)
+            ids = list(set(ids))
+            return queryset.filter(pk__in=ids)
+        elif self.value() == 'none':
+            ids = []
+            ids += HousingPreferences.objects.filter(latest=True).values_list('attendee_id', flat=True)
+            ids += Dinner.objects.filter(latest=True).values_list('attendee_id', flat=True)
+            ids += Activities.objects.filter(latest=True).values_list('attendee_id', flat=True)
+            ids += Swag.objects.filter(latest=True).values_list('attendee_id', flat=True)
+            ids += Bus.objects.filter(latest=True).values_list('attendee_id', flat=True)
+            ids = list(set(ids))
+            return queryset.exclude(pk__in=ids)
+        else:
+            return queryset
 
 class AttendeeAbstractInline(admin.StackedInline):
     extra = 0
@@ -258,41 +124,39 @@ class AttendeeLogisticsInline(admin.TabularInline):
 class AttendeeAcceptanceInline(AttendeeLogisticsInline):
     model = Acceptance
 class AttendeeLogisticsMARCInline(AttendeeLogisticsInline):
-    model = LogisticsMARC
+    model = MARC
+class AttendeeLogisticsHousingPreferencesInline(AttendeeLogisticsInline):
+    model = HousingPreferences
+    fk_name = 'attendee'
+class AttendeeLogisticsHousingAssignmentsInline(AttendeeLogisticsInline):
+    model = HousingAssignments
+    fk_name = 'attendee'
 class AttendeeLogisticsDinnerInline(AttendeeLogisticsInline):
-    model = LogisticsDinner
+    model = Dinner
 class AttendeeLogisticsActivitiesInline(AttendeeLogisticsInline):
-    model = LogisticsActivities
+    model = Activities
 class AttendeeLogisticsSwagInline(AttendeeLogisticsInline):
-    model = LogisticsSwag
+    model = Swag
 class AttendeeLogisticsBusInline(AttendeeLogisticsInline):
-    model = LogisticsBus
+    model = Bus
 
 class AttendeeAdmin(admin.ModelAdmin):
-    list_filter = [QuARCFilter, AttendeeAcceptedFilter, AttendeeDroppedFilter]
+    list_filter = [QuARCFilter, AttendeeAcceptedFilter, AttendeeDroppedFilter, 'status',
+                   AttendeeLogisticsFilter]
     actions = [accept_attendees, reject_attendees]
-    inlines = (AttendeeAbstractInline, AttendeeAcceptanceInline, AttendeeLogisticsMARCInline,
-               AttendeeLogisticsDinnerInline, AttendeeLogisticsActivitiesInline,
+    inlines = (AttendeeAbstractInline, AttendeeAcceptanceInline,
+               AttendeeLogisticsMARCInline, AttendeeLogisticsDinnerInline,
+               AttendeeLogisticsHousingPreferencesInline, AttendeeLogisticsHousingAssignmentsInline,
+               AttendeeLogisticsActivitiesInline,
                AttendeeLogisticsSwagInline, AttendeeLogisticsBusInline,)
+
+# Attendee admin panel: slightly different filter rules and lots of inlines
+admin.site.register(Attendee, AttendeeAdmin)
 
 class AbstractAdmin(admin.ModelAdmin):
     list_filter = [AttendeeQuARCFilter, AcceptedFilter, DroppedFilter]
     readonly_fields = ('attendee',)
     form = AbstractForm
 
-admin.site.register(QuARCConference)
-admin.site.register(QSECMember, QuARCQSECMembersAdmin)
-admin.site.register(QuARCQSECMembers, QuARCAdmin)
-
-admin.site.register(Attendee, AttendeeAdmin)
-admin.site.register(LogisticsMARC, LogisticsAdmin)
-admin.site.register(LogisticsHousingPreferences, LogisticsAdmin)
-admin.site.register(LogisticsHousingAssignments, LogisticsAdmin)
-admin.site.register(DinnerOptions, QuARCAdmin)
-admin.site.register(LogisticsDinner, LogisticsAdmin)
-admin.site.register(LogisticsActivities, LogisticsAdmin)
-admin.site.register(SwagOptions, QuARCAdmin)
-admin.site.register(LogisticsSwag, LogisticsAdmin)
-admin.site.register(LogisticsBus, LogisticsAdmin)
-admin.site.register(Acceptance, LogisticsAdmin)
+# Abstract admin panel: uses a nicer form to view abstracts
 admin.site.register(Abstract, AbstractAdmin)

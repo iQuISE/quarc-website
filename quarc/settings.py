@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['192.168.122.202', '192.168.1.4', 'carterturn.com']
 INSTALLED_APPS = [
     'committee.apps.CommitteeConfig',
     'conference.apps.ConferenceConfig',
+    'logistics.apps.LogisticsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

@@ -9,6 +9,4 @@ urlpatterns = [
     path('quarc<int:year>/abstract-submission/', views.registration_abstract_submission, name='registration_abstract_submission'),
     path('quarc<int:year>/university-and-industry-personnel/', views.registration_university_industry, name='registration_university_industry'),
     path('quarc<int:year>/abstract-submission-closed/', views.registration_closed, name='registration_closed'),
-    path('quarc<int:year>/logistics-form/', views.logistics_page, name='logistics_page'),
-    path('quarc<int:year>/logistics-closed/', views.logistics_closed, name='logistics_closed'),
 ]
