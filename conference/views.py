@@ -4,7 +4,7 @@ from django.db import models
 
 from datetime import datetime
 
-from conference.models import QuARCConference, QuARCQSECMembers, Attendee
+from conference.models import QuARCConference, QuARCQSECMembers, Attendee, ProgramEvent
 from conference.forms import AttendeeForm, AbstractForm
 
 from logistics.models import Acceptance
@@ -145,3 +145,14 @@ def registration_closed(request, year):
     return render(request, 'registration_closed.html',
                   {'conference': conf, 'show_countdown': False,
                    'will_open': will_open})
+
+def program(request, year):
+    try:
+        conf = get_conference(year)
+    except ValueError:
+        return page_not_found(request, '')
+
+    program_data = ProgramEvent.objects.filter(quarc=conf)
+
+    return render(request, 'program.html',
+                  {'conference': conf, 'show_countdown': True, 'program_data': program_data})

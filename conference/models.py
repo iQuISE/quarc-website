@@ -108,3 +108,15 @@ class QuARCQSECMembers(models.Model):
     class Meta:
         verbose_name = 'QSEC for QuARC'
         verbose_name_plural = 'QSEC for QuARC'
+
+class ProgramEvent(models.Model):
+    quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
+    event = models.CharField(max_length=64, blank=False)
+    location = models.CharField(max_length=64, blank=False)
+    date = models.DateField()
+    start_time = models.TimeField(blank=False)
+    end_time = models.TimeField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'QuARC Event'
+        verbose_name_plural = 'QuARC Events'

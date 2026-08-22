@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 from django.template.response import TemplateResponse
 
-from conference.models import QuARCConference, QSECMember, QuARCQSECMembers, Attendee, Abstract
+from conference.models import QuARCConference, QSECMember, QuARCQSECMembers, Attendee, Abstract, ProgramEvent
 from conference.forms import AbstractForm
 from conference.admin_filters import *
 
@@ -17,8 +17,8 @@ admin.site.register(QuARCConference)
 class QuARCAdmin(admin.ModelAdmin):
     list_filter = [QuARCFilter]
 
-# For associating QSEC, Dinner, and Swag with a conference
 admin.site.register(QuARCQSECMembers, QuARCAdmin)
+admin.site.register(ProgramEvent, QuARCAdmin)
 
 @admin.action(description="Add QSEC members to QuARC conference")
 def add_qsec_to_quarc(modeladmin, request, queryset):

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Program - QuARC {{conference.year}}{% endblock %}
+{% block extend_style %}
+<style>
+    .program-section {
+        padding: 40px 0;
+    }
+
+    .program-header {
+        text-align: center;
+        margin-bottom: 50px;
+        padding: 40px 0;
+    }
+
+    .program-header h1 {
+        font-size: 48px;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 15px;
+    }
+
+    .program-header .subtitle {
+        font-size: 20px;
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+
+    .date-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 25px 30px;
+        border-radius: 15px;
+        margin: 30px 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .date-header h2 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .event-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .event-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .event-time {
+        font-size: 14px;
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+    .event-time i {
+        margin-right: 8px;
+        font-size: 18px;
+    }
+
+    .event-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 10px;
+    }
+
+    .event-location {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    .event-location i {
+        margin-right: 8px;
+        color: var(--primary-color);
+    }
+
+    .event-description {
+        font-size: 15px;
+        color: #555;
+        line-height: 1.6;
+        margin-top: 10px;
+    }
+
+    .event-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .content-section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .section-divider {
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        margin: 40px 0;
+    }
+
+    @media (max-width: 768px) {
+        .program-header h1 {
+            font-size: 36px;
+        }
+
+        .date-header h2 {
+            font-size: 22px;
+        }
+
+        .event-title {
+            font-size: 18px;
+        }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="program-section">
+    {% if program_data %}
+    <div class="content-section">
+        {% regroup program_data by date as events_by_date %}
+        {% for date_group in events_by_date %}
+        <div class="date-header">
+            <h2>{{ date_group.grouper|date:"F j, Y" }}</h2>
+        </div>
+
+        {% for event in date_group.list %}
+        <div class="event-card">
+            <div class="event-time">
+                <i class="bi bi-clock"></i>
+                <span>{{ event.start_time|time:"g:i A" }} 
+                {% if event.end_time %} - {{ event.end_time|time:"g:i A" }}{% endif %}
+                </span>
+            </div>
+            <h3 class="event-title">{{ event.event }}</h3>
+            <div class="event-location">
+                <i class="bi bi-geo-alt"></i>
+                {{ event.location }}
+            </div>
+            {% if event.description %}
+            <p class="event-description">{{ event.description }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="content-section">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            No program events available yet. Check back later for updates.
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
