@@ -91,6 +91,11 @@ class HousingAssignments(LogisticsModel):
                 % (self.attendee.first_name, self.attendee.last_name,
                    self.roommate.first_name, self.roommate.last_name))
 
+    def clean(self):
+        if self.roommate.quarc != self.attendee.quarc:
+            raise ValidationError('Roommate QuARC does not match attendee QuARC')
+        super().clean()
+
     class Meta:
         verbose_name = 'Housing Assignment Logistics'
         verbose_name_plural = 'Housing Assignment Logistics'
@@ -151,6 +156,11 @@ class Dinner(LogisticsModel):
     def __str__(self):
         return '%s %s' % (self.attendee.first_name, self.attendee.last_name)
 
+    def clean(self):
+        if self.option.quarc != self.attendee.quarc:
+            raise ValidationError('Dinner option QuARC does not match attendee QuARC')
+        super().clean()
+
     class Meta:
         verbose_name = 'Dinner Logistics'
         verbose_name_plural = 'Dinner Logistics'
@@ -183,6 +193,11 @@ class Swag(LogisticsModel):
     def __str__(self):
         return '%s %s: %s' % (self.attendee.first_name, self.attendee.last_name, self.swag_option.option)
 
+    def clean(self):
+        if self.swag_option.quarc != self.attendee.quarc:
+            raise ValidationError('Swag QuARC does not match attendee QuARC')
+        super().clean()
+
     class Meta:
         verbose_name = 'Swag Logistics'
         verbose_name_plural = 'Swag Logistics'
@@ -196,6 +211,7 @@ class Buses(models.Model):
     quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
     type = models.IntegerField(choices=BusOption.choices, null=False, blank=False)
     number = models.IntegerField(null=False, blank=False)
+    capacity = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return '%s Bus #%s' % (self.get_type_display(), self.number)
@@ -206,22 +222,38 @@ class Buses(models.Model):
 
 def validate_bus_to(bus):
     if bus.type != BusOption.Early or bus.type != BusOption.Late:
-        raise ValidationError('%s is not a bus to QuARC')
+        raise ValidationError('%s is not a bus to QuARC' % bus)
 def validate_bus_from(bus):
     if bus.type != BusOption.Return:
-        raise ValidationError('%s is not a bus from QuARC')
+        raise ValidationError('%s is not a bus from QuARC' % bus)
+def validate_bus_capacity(bus):
+    if bus.type == BusOption.Early or bus.type == BusOption.Late:
+        if Bus.objects.filter(bus_to_assignment=bus).count() >= bus.capacity():
+            raise ValidationError('%s is full' % bus)
+    elif bus.type == BusOption.Return:
+        if Bus.objects.filter(bus_from_assignment=bus).count() >= bus.capacity():
+            raise ValidationError('%s is full' % bus)
 
 class Bus(LogisticsModel):
     bus_to_required = models.BooleanField(null=False)
     bus_to_type = models.IntegerField(choices=Buses.BusOption.choices, null=True, blank=True)
     bus_from_required = models.BooleanField(null=False)
     bus_to_assignment = models.ForeignKey(Buses, null=True, blank=True, on_delete=models.SET_NULL,
-                                          related_name='bus_to', validators=[validate_bus_to])
+                                          related_name='bus_to',
+                                          validators=[validate_bus_to, validate_bus_capacity])
     bus_from_assignment = models.ForeignKey(Buses, null=True, blank=True, on_delete=models.SET_NULL,
-                                            related_name='bus_from', validators=[validate_bus_to])
+                                            related_name='bus_from',
+                                            validators=[validate_bus_from, validate_bus_capacity])
 
     def __str__(self):
         return '%s %s' % (self.attendee.first_name, self.attendee.last_name)
+
+    def clean(self):
+        if self.bus_to_assignment.quarc != self.attendee.quarc:
+            raise ValidationError('Bus to QuARC does not match attendee QuARC')
+        if self.bus_from_assignment.quarc != self.attendee.quarc:
+            raise ValidationError('Bus from QuARC does not match attendee QuARC')
+        super().clean()
 
     class Meta:
         verbose_name = 'Bus Logistics'

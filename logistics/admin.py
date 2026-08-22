@@ -22,7 +22,7 @@ admin.site.register(DinnerOptions, QuARCAdmin)
 admin.site.register(SwagOptions, QuARCAdmin)
 admin.site.register(Buses, QuARCAdmin)
 
-@admin.action(description="Export logistics to CSV")
+@admin.action(description='Export logistics to CSV')
 def export_logistics_to_csv(modeladmin, request, queryset):
     RM_FIELDS = ['ID', 'attendee', 'latest', 'edit_time']
     opts = modeladmin.model._meta
@@ -129,6 +129,34 @@ class BusAdmin(LogisticsAdmin):
     list_filter = LogisticsAdmin.list_filter + [BusToFilter, BusFromFilter]
     list_display = LogisticsAdmin.list_display + ('bus_to_required', 'bus_to_type', 'bus_to_assignment',
                                                   'bus_from_required', 'bus_from_assignment')
+
+    def get_actions(self, request):
+        def assign_to_bus_gen(bus):
+            def assign_to_bus(self, request, queryset):
+                queryset.update(bus_to_assignment=bus)
+            return assign_to_bus
+
+        def assign_from_bus_gen(bus):
+            def assign_from_bus(self, request, queryset):
+                queryset.update(bus_from_assignment=bus)
+            return assign_from_bus
+
+        actions = super().get_actions(request)
+
+        to_buses = Buses.objects.filter(models.Q(type=Buses.BusOption.Early)
+                                        | models.Q(type=Buses.BusOption.Late))
+        from_buses = Buses.objects.filter(type=Buses.BusOption.Return)
+
+        for to_bus in to_buses:
+            name = 'add_to_{}'.format(to_bus.pk)
+            actions[name] = (assign_to_bus_gen(to_bus), name, 'Add to {}'.format(to_bus))
+
+        for from_bus in from_buses:
+            name = 'add_from_{}'.format(from_bus.pk)
+            actions[name] = (assign_from_bus_gen(from_bus), name, 'Add to {}'.format(from_bus))
+
+        return actions
+
 admin.site.register(Bus, BusAdmin)
 
 admin.site.register(Acceptance, LogisticsAdmin)
