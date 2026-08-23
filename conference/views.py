@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.views.defaults import page_not_found
 
 from datetime import datetime
 
-from conference.models import QuARCConference, QuARCQSECMembers, Attendee, ProgramEvent
+from conference.models import QuARCConference, QuARCQSECMembers, Attendee, ProgramEvent, Session, SessionAbstract, Abstract
 from conference.forms import AttendeeForm, AbstractForm
 
 from logistics.models import Acceptance
@@ -156,3 +157,37 @@ def program(request, year):
 
     return render(request, 'program.html',
                   {'conference': conf, 'show_countdown': True, 'program_data': program_data})
+
+def abstracts(request, year):
+    try:
+        conf = get_conference(year)
+    except ValueError:
+        return page_not_found(request, '')
+
+    session_data = Session.objects.filter(quarc=conf)
+    session_list = []
+
+    for session in session_data:
+        abstracts = SessionAbstract.objects.filter(session=session)
+        session_list.append({'name': session.name,
+                             'abstracts': [{'pk': a.abstract.pk, 'title': a.abstract.title,
+                                            'author': str(a.abstract.attendee),
+                                            'research_area': a.abstract.research_area}
+                                           for a in abstracts]})
+
+    return render(request, 'abstract_list.html',
+                  {'conference': conf, 'show_countdown': True, 'sessions': session_list})
+
+def abstract(request, year, abstract_id):
+    try:
+        conf = get_conference(year)
+    except ValueError:
+        return page_not_found(request, '')
+
+    try:
+        abstract = Abstract.objects.filter(attendee__quarc=conf, pk=abstract_id).last
+    except Exception:
+        return page_not_found(request, '')
+
+    return render(request, 'abstract.html',
+                  {'conference': conf, 'show_countdown': True, 'abstract': abstract})

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 from django.template.response import TemplateResponse
 
-from conference.models import QuARCConference, QSECMember, QuARCQSECMembers, Attendee, Abstract, ProgramEvent
+from conference.models import QuARCConference, QSECMember, QuARCQSECMembers, Attendee, Abstract, ProgramEvent, Session, SessionAbstract
 from conference.forms import AbstractForm
 from conference.admin_filters import *
 
@@ -157,6 +157,15 @@ class AbstractAdmin(admin.ModelAdmin):
     list_filter = [AttendeeQuARCFilter, AcceptedFilter, DroppedFilter]
     readonly_fields = ('attendee',)
     form = AbstractForm
+    list_display = ('attendee', 'title', 'research_area', 'research_group')
 
 # Abstract admin panel: uses a nicer form to view abstracts
 admin.site.register(Abstract, AbstractAdmin)
+
+admin.site.register(Session, QuARCAdmin)
+
+class SessionAbstractAdmin(admin.ModelAdmin):
+    list_filter = [SessionQuARCFilter]
+
+admin.site.register(SessionAbstract, SessionAbstractAdmin)
+

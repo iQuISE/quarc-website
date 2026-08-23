@@ -394,8 +394,14 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="/quarc{{conference.year}}">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/quarc{{conference.year}}/program">Program</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="programDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Program
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="programDropdown">
+                            <li><a class="dropdown-item" href="/quarc{{conference.year}}/program/">Program</a></li>
+                            <li><a class="dropdown-item" href="/quarc{{conference.year}}/abstracts/">Abstract List</a></li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/quarc{{conference.year}}/committee">Committee</a>

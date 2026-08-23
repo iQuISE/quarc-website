@@ -37,3 +37,6 @@ class QuARCFilter(admin.SimpleListFilter):
             year = self.value()
 
         return queryset.filter(**{self.filter_column: year})
+
+class SessionQuARCFilter(QuARCFilter):
+    filter_column = 'session__quarc__year'

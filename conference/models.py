@@ -124,3 +124,39 @@ class ProgramEvent(models.Model):
     class Meta:
         verbose_name = 'QuARC Event'
         verbose_name_plural = 'QuARC Events'
+
+class Session(models.Model):
+    quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
+    event = models.ForeignKey(ProgramEvent, null=True, blank=True, on_delete=models.SET_NULL)
+    name = models.CharField(max_length=32, blank=False)
+
+    def validate_unique(self, exclude=None):
+        conflict = Session.objects.filter(quarc=self.quarc).filter(name=self.name).exclude(id=self.id)
+        if conflict.exists():
+            raise ValidationError('Session {} is already a session in QuARC {}.'.format(self.name, self.quarc.year))
+        super().validate_unique(exclude=exclude)
+
+    def __str__(self):
+        return 'QuARC %d Session %s' % (self.quarc.year, self.name)
+
+    class Meta:
+        verbose_name = 'QuARC Session'
+        verbose_name_plural = 'QuARC Sessions'
+
+class SessionAbstract(models.Model):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    abstract = models.ForeignKey(Abstract, on_delete=models.CASCADE)
+    number = models.IntegerField(validators=[MinValueValidator(1)])
+
+    def validate_unique(self, exclude=None):
+        conflict = SessionAbstract.objects.filter(session=self.session, number=self.number).exclude(id=self.id)
+        if conflict.exists():
+            raise ValidationError('Session {} already has abstract #{}.'.format(self.session.name, self.number))
+        super().validate_unique(exclude=exclude)
+
+    def __str__(self):
+        return '%s in %s' % (self.abstract.attendee, self.session)
+
+    class Meta:
+        verbose_name = 'QuARC Session Abstract Assignment'
+        verbose_name_plural = 'QuARC Session Abstract Assignments'
