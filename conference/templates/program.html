@@ -2,29 +2,6 @@
 {% block title %}Program - QuARC {{conference.year}}{% endblock %}
 {% block extend_style %}
 <style>
-    .program-section {
-        padding: 40px 0;
-    }
-
-    .program-header {
-        text-align: center;
-        margin-bottom: 50px;
-        padding: 40px 0;
-    }
-
-    .program-header h1 {
-        font-size: 48px;
-        font-weight: 700;
-        color: var(--dark-color);
-        margin-bottom: 15px;
-    }
-
-    .program-header .subtitle {
-        font-size: 20px;
-        color: var(--primary-color);
-        font-weight: 500;
-    }
-
     .date-header {
         background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
         color: white;
@@ -98,70 +75,52 @@
         margin-bottom: 0;
     }
 
-    .content-section {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
+ @media (max-width: 768px) {
+     .date-header h2 {
+         font-size: 22px;
+     }
 
-    .section-divider {
-        height: 2px;
-        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-        margin: 40px 0;
-    }
-
-    @media (max-width: 768px) {
-        .program-header h1 {
-            font-size: 36px;
-        }
-
-        .date-header h2 {
-            font-size: 22px;
-        }
-
-        .event-title {
-            font-size: 18px;
-        }
-    }
+     .event-title {
+         font-size: 18px;
+     }
+ }
 </style>
 {% endblock %}
 {% block content %}
-<div class="program-section">
-    {% if program_data %}
-    <div class="content-section">
-        {% regroup program_data by date as events_by_date %}
-        {% for date_group in events_by_date %}
-        <div class="date-header">
-            <h2>{{ date_group.grouper|date:"F j, Y" }}</h2>
-        </div>
+{% if program_data %}
+{% regroup program_data by date as events_by_date %}
+{% for date_group in events_by_date %}
+<div class="content-section">
+    <div class="date-header">
+        <h2>{{ date_group.grouper|date:"F j, Y" }}</h2>
+    </div>
 
-        {% for event in date_group.list %}
-        <div class="event-card">
-            <div class="event-time">
-                <i class="bi bi-clock"></i>
-                <span>{{ event.start_time|time:"g:i A" }} 
+    {% for event in date_group.list %}
+    <div class="event-card">
+        <div class="event-time">
+            <i class="bi bi-clock"></i>
+            <span>{{ event.start_time|time:"g:i A" }} 
                 {% if event.end_time %} - {{ event.end_time|time:"g:i A" }}{% endif %}
-                </span>
-            </div>
-            <h3 class="event-title">{{ event.event }}</h3>
-            <div class="event-location">
-                <i class="bi bi-geo-alt"></i>
-                {{ event.location }}
-            </div>
-            {% if event.description %}
-            <p class="event-description">{{ event.description }}</p>
-            {% endif %}
+            </span>
         </div>
-        {% endfor %}
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="content-section">
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i>
-            No program events available yet. Check back later for updates.
+        <h3 class="event-title">{{ event.event }}</h3>
+        <div class="event-location">
+            <i class="bi bi-geo-alt"></i>
+            {{ event.location }}
         </div>
+        {% if event.description %}
+        <p class="event-description">{{ event.description }}</p>
+        {% endif %}
     </div>
-    {% endif %}
+    {% endfor %}
 </div>
+{% endfor %}
+{% else %}
+<div class="content-section">
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i>
+        No program events available yet. Check back later for updates.
+    </div>
+</div>
+{% endif %}
 {% endblock %}
