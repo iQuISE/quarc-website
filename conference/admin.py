@@ -1,6 +1,9 @@
+from django.conf import settings
 from django.contrib import admin
 from django.db import models
+from django.http import HttpResponse
 from django.template.response import TemplateResponse
+from wsgiref.util import FileWrapper
 
 from conference.models import QuARCConference, QSECMember, QuARCQSECMembers, Attendee, Abstract, ProgramEvent, Session, SessionAbstract
 from conference.forms import AbstractForm
@@ -9,7 +12,10 @@ from conference.admin_filters import *
 from logistics.models import Acceptance, MARC, HousingPreferences, HousingAssignments, Dinner, Activities, Swag, Bus
 from logistics.admin_filters import AttendeeQuARCFilter, AcceptedFilter, DroppedFilter
 
+import csv
 from datetime import datetime
+import os
+import tempfile, zipfile
 
 # The admin panel for creating and managing conference objects
 admin.site.register(QuARCConference)
@@ -153,9 +159,68 @@ class AttendeeAdmin(admin.ModelAdmin):
 # Attendee admin panel: slightly different filter rules and lots of inlines
 admin.site.register(Attendee, AttendeeAdmin)
 
+@admin.action(description='Download abstracts')
+def download_abstracts(modeladmin, request, queryset):
+    RM_FIELDS = ['ID', 'attendee', 'figure', 'resume']
+    opts = modeladmin.model._meta
+    filename = opts.verbose_name
+    csv_tempfile = tempfile.TemporaryFile('w+')
+    writer = csv.writer(csv_tempfile)
+
+    attendee_fields = [Attendee._meta.get_field('first_name'),
+                       Attendee._meta.get_field('last_name'),
+                       Attendee._meta.get_field('email')]
+    fields = [field for field in opts.get_fields() if not field.many_to_many and not field.one_to_many]
+    fields = [field for field in fields if field.name not in RM_FIELDS]
+    # Prepare the zipfile of figures and resumes
+    response = HttpResponse(content_type='application/zip',
+                            headers={'Content-Disposition': 'attachment; filename=abstract_data.zip'})
+    archive = zipfile.ZipFile(response, 'w', zipfile.ZIP_DEFLATED)
+    # Write a first row with header information
+    columns = [field.verbose_name for field in attendee_fields + fields] + ['figure', 'resume']
+    print(columns)
+    writer.writerow(columns)
+    # Write data rows
+    for obj in queryset:
+        data_row = []
+        for field in attendee_fields:
+            value = getattr(obj.attendee, field.name)
+            if isinstance(value, datetime):
+                value = value.strftime('%Y-%m-%d')
+            data_row.append(value)
+        for field in fields:
+            value = getattr(obj, field.name)
+            if isinstance(value, datetime):
+                value = value.strftime('%Y-%m-%d')
+            data_row.append(value)
+
+        if obj.figure is not None:
+            path = obj.figure.name
+            archive_filename = 'figure_{}{}'.format(obj.attendee.email, os.path.splitext(path)[1])
+            archive.write(os.path.join(settings.MEDIA_ROOT, path), archive_filename)
+            data_row.append(archive_filename)
+        else:
+            data_row.append('')
+
+        if obj.resume is not None:
+            path = obj.resume.name
+            archive_filename = 'resume_{}{}'.format(obj.attendee.email, os.path.splitext(path)[1])
+            archive.write(os.path.join(settings.MEDIA_ROOT, path), archive_filename)
+            data_row.append(archive_filename)
+        else:
+            data_row.append('')
+
+        writer.writerow(data_row)
+
+    csv_tempfile.seek(0)
+    archive.writestr('abstract_data.csv', csv_tempfile.read())
+    archive.close()
+    return response
+
 class AbstractAdmin(admin.ModelAdmin):
     list_filter = [AttendeeQuARCFilter, AcceptedFilter, DroppedFilter]
     readonly_fields = ('attendee',)
+    actions = [download_abstracts]
     form = AbstractForm
     list_display = ('attendee', 'title', 'research_area', 'research_group')
 

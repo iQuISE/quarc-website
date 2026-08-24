@@ -12,10 +12,14 @@
         <div>{{ abstract.abstract|linebreaks }}</div>
 
         {% if abstract.figure %}
-        <div class="mt-4 p-3 bg-light rounded mb-4">
-            <img src="{{ abstract.figure.url }}" alt="{{ abstract.figure_caption }}" class="img-fluid img-rounded img-shadow mb-2">
+        <div class="info-grid">
+			<div class="info-item">
+				<img src="{{ abstract.figure.url }}" alt="{{ abstract.figure_caption }}" class="img-fluid mb-2">
+			</div>
             {% if abstract.figure_caption %}
-            <p class="fst-italic text-muted mb-0">{{ abstract.figure_caption }}</p>
+			<div class="info-item">
+				<p class="fst-italic text-muted mb-0">{{ abstract.figure_caption|linebreaks }}</p>
+			</div>
             {% endif %}
         </div>
 		{% endif %}
