@@ -194,17 +194,17 @@ def download_abstracts(modeladmin, request, queryset):
                 value = value.strftime('%Y-%m-%d')
             data_row.append(value)
 
-        if obj.figure is not None:
+        if len(obj.figure.name) > 0:
             path = obj.figure.name
-            archive_filename = 'figure_{}{}'.format(obj.attendee.email, os.path.splitext(path)[1])
+            archive_filename = 'abstract_data/figures/{}{}'.format(obj.attendee.email, os.path.splitext(path)[1])
             archive.write(os.path.join(settings.MEDIA_ROOT, path), archive_filename)
             data_row.append(archive_filename)
         else:
             data_row.append('')
 
-        if obj.resume is not None:
+        if len(obj.resume.name) > 0:
             path = obj.resume.name
-            archive_filename = 'resume_{}{}'.format(obj.attendee.email, os.path.splitext(path)[1])
+            archive_filename = 'abstract_data/resumes/{}{}'.format(obj.attendee.email, os.path.splitext(path)[1])
             archive.write(os.path.join(settings.MEDIA_ROOT, path), archive_filename)
             data_row.append(archive_filename)
         else:
@@ -213,7 +213,7 @@ def download_abstracts(modeladmin, request, queryset):
         writer.writerow(data_row)
 
     csv_tempfile.seek(0)
-    archive.writestr('abstract_data.csv', csv_tempfile.read())
+    archive.writestr('abstract_data/abstract_data.csv', csv_tempfile.read())
     archive.close()
     return response
 
