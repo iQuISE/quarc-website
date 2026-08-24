@@ -76,7 +76,7 @@ class Abstract(models.Model):
     research_group = models.CharField(max_length=64)
     cqe_feature = models.BooleanField(null=False)
     resume = models.FileField(upload_to='resumes', blank=True)
-    graduation_date = models.DateField(null=True)
+    graduation_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return '%s %s' % (self.attendee.first_name, self.attendee.last_name)

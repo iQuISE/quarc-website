@@ -10,3 +10,6 @@ urlpatterns = [
     path('', include('logistics.urls')),
     path('admin/', admin.site.urls),
 ]
+
+handler500 = 'conference.views.error_handler'
+handler404 = 'conference.views.page_not_found'

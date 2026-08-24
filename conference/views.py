@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.views.defaults import page_not_found
 
 from datetime import datetime
 
@@ -10,6 +9,8 @@ from conference.forms import AttendeeForm, AbstractForm
 
 from logistics.models import Acceptance
 from logistics.forms import MARCForm
+
+import re
 
 def get_conference(year):
     conferences = QuARCConference.objects.filter(year=year)
@@ -21,7 +22,7 @@ def index(request, year):
     try:
         conf = get_conference(year)
     except ValueError:
-        return page_not_found(request, '')
+        return page_not_found(request, None)
 
     return render(request, 'index.html',
                   {'conference': conf, 'show_countdown': True})
@@ -30,7 +31,7 @@ def qsec_membership(request, year):
     try:
         conf = get_conference(year)
     except ValueError:
-        return page_not_found(request, '')
+        return page_not_found(request, None)
 
     qsec_year_founders = QuARCQSECMembers.objects.filter(quarc=conf, qsec_member__founder=True)
     qsec_year_members = QuARCQSECMembers.objects.filter(quarc=conf, qsec_member__founder=False)
@@ -47,7 +48,7 @@ def attend(request, year):
     try:
         conf = get_conference(year)
     except ValueError:
-        return page_not_found(request, '')
+        return page_not_found(request, None)
 
     return render(request, 'attend.html',
                   {'conference': conf, 'show_countdown': True})
@@ -56,7 +57,7 @@ def registration_abstract_submission(request, year):
     try:
         conf = get_conference(year)
     except ValueError:
-        return page_not_found(request, '')
+        return page_not_found(request, None)
 
     if not conf.abstract_submission_active:
         return registration_closed(request, year)
@@ -99,7 +100,7 @@ def registration_university_industry(request, year):
     try:
         conf = get_conference(year)
     except ValueError:
-        return page_not_found(request, '')
+        return page_not_found(request, None)
 
     if not conf.university_industry_registration_active:
         return registration_closed(request, year)
@@ -136,7 +137,7 @@ def registration_closed(request, year):
     try:
         conf = get_conference(year)
     except ValueError:
-        return page_not_found(request, '')
+        return page_not_found(request, None)
 
     if conf.abstract_submission_active:
         return registration_abstract_submission(request, year)
@@ -151,7 +152,7 @@ def program(request, year):
     try:
         conf = get_conference(year)
     except ValueError:
-        return page_not_found(request, '')
+        return page_not_found(request, None)
 
     program_data = ProgramEvent.objects.filter(quarc=conf)
 
@@ -162,7 +163,7 @@ def abstracts(request, year):
     try:
         conf = get_conference(year)
     except ValueError:
-        return page_not_found(request, '')
+        return page_not_found(request, None)
 
     session_data = Session.objects.filter(quarc=conf)
     session_list = []
@@ -182,12 +183,45 @@ def abstract(request, year, abstract_id):
     try:
         conf = get_conference(year)
     except ValueError:
-        return page_not_found(request, '')
+        return page_not_found(request, None)
 
     try:
         abstract = Abstract.objects.filter(attendee__quarc=conf, pk=abstract_id).last
     except Exception:
-        return page_not_found(request, '')
+        return page_not_found(request, None)
 
     return render(request, 'abstract.html',
                   {'conference': conf, 'show_countdown': True, 'abstract': abstract})
+
+def error_handler(request, exception=None, status_code=404):
+    year = None
+    year_match = re.search(r'quarc(\d+)/', request.path)
+    if year_match:
+        try:
+            year = int(year_match.group(1))
+        except ValueError:
+            pass
+
+    if year:
+        conf = get_conference(year)
+    else:
+        # Default to most recent QuARC
+        # This might fail, but in that case we should just show the user the error
+        conf = QuARCConference.objects.order_by('-year').first()
+
+    error_code_strs = {
+        400: 'Bad Request',
+        403: 'Forbidden',
+        404: 'Page Not Found',
+        413: 'Content Too Large',
+        500: 'Server Error',
+    }
+
+    error_message = error_code_strs.get(status_code, 'Error')
+
+    return render(request, 'error.html',
+                  {'conference': conf, 'show_countdown': False,
+                   'error_code': status_code, 'error_message': error_message})
+
+def page_not_found(request, exception):
+    return error_message(request, exception)
