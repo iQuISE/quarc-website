@@ -1,247 +1,65 @@
 {% extends "base.html" %}
-{% block title %}{{ abstract.title }} - QuARC {{conference.year}}{% endblock %}
-{% block extend_style %}
-<style>
- .abstract-header {
-     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-     color: white;
-     padding: 40px 0;
-     text-align: center;
-     margin-bottom: 40px;
- }
-
- .abstract-header h1 {
-     font-size: 36px;
-     font-weight: 700;
-     margin: 0 0 15px 0;
-     line-height: 1.3;
- }
-
- .abstract-header .subtitle {
-     font-size: 18px;
-     opacity: 0.9;
- }
-
- .authors-list {
-     font-size: 18px;
-     color: var(--dark-color);
-     margin-bottom: 20px;
-     line-height: 1.6;
- }
-
- .figure-container {
-     text-align: center;
-     margin: 30px 0;
-     padding: 20px;
-     background: #f8f9fa;
-     border-radius: 8px;
- }
-
- .figure-container img {
-     max-width: 100%;
-     height: auto;
-     border-radius: 8px;
-     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
- }
-
- .figure-caption {
-     font-size: 14px;
-     color: #666;
-     margin-top: 10px;
-     font-style: italic;
- }
-
- .info-grid {
-     display: grid;
-     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-     gap: 20px;
-     margin-top: 20px;
- }
-
- .info-item {
-     background: #f8f9fa;
-     padding: 15px 20px;
-     border-radius: 8px;
- }
-
- .info-label {
-     font-size: 13px;
-     color: #666;
-     font-weight: 500;
-     text-transform: uppercase;
-     letter-spacing: 0.5px;
-     margin-bottom: 5px;
- }
-
- .info-value {
-     font-size: 15px;
-     color: var(--dark-color);
-     font-weight: 500;
- }
-
- .download-btn {
-     display: inline-block;
-     background: var(--primary-color);
-     color: white;
-     padding: 12px 24px;
-     border-radius: 8px;
-     text-decoration: none;
-     font-weight: 600;
-     transition: background 0.2s ease;
-     margin-top: 15px;
- }
-
- .download-btn:hover {
-     background: var(--secondary-color);
- }
-
- .flag-icon {
-     display: inline-block;
-     padding: 4px 12px;
-     border-radius: 20px;
-     font-size: 13px;
-     font-weight: 600;
-     margin-right: 8px;
- }
-
- .flag-cqe {
-     background: rgba(46, 163, 242, 0.1);
-     color: var(--primary-color);
- }
-
- .flag-oral {
-     background: rgba(131, 0, 233, 0.1);
-     color: var(--secondary-color);
- }
-
- .flag-internship {
-     background: rgba(255, 193, 7, 0.1);
-     color: #ffc107;
- }
-
- .flag-position {
-     background: rgba(255, 99, 132, 0.1);
-     color: #ff6384;
- }
-
- .back-link {
-     display: inline-block;
-     margin-bottom: 20px;
-     color: var(--primary-color);
-     text-decoration: none;
-     font-weight: 500;
-     transition: color 0.2s ease;
- }
-
- .back-link:hover {
-     color: var(--secondary-color);
- }
-
- @media (max-width: 768px) {
-     .abstract-header h1 {
-         font-size: 28px;
-     }
-
-     .info-grid {
-         grid-template-columns: 1fr;
-     }
- }
-</style>
-{% endblock %}
-{% block content %}
+{% block title %}{{ abstract.title }} - QuARC {{conference.year}}{% endblock %}{% block content %}
 <div class="content-section">
-    <div class="abstract-header">
-        <h1>{{ abstract.title }}</h1>
-        <p class="subtitle">QuARC {{conference.year}}</p>
+    <div class="gradient-header-sm">
+        <h2>{{ abstract.title }}</h2>
     </div>
 
     <div>
-        <div class="authors-list">
-            {{ abstract.author_list }}
-        </div>
+        <div class="fs-6 text-dark mb-4">{{ abstract.author_list }}</div>
 
-        <h3 class="section-title">Abstract</h3>
-        <div>
-            {{ abstract.abstract|linebreaks }}
-        </div>
+        <h3 class="mb-4">Abstract</h3>
+        <div>{{ abstract.abstract|linebreaks }}</div>
 
         {% if abstract.figure %}
-        <div class="figure-container">
-            <img src="{{ abstract.figure.url }}" alt="{{ abstract.figure_caption }}">
+        <div class="mt-4 p-3 bg-light rounded mb-4">
+            <img src="{{ abstract.figure.url }}" alt="{{ abstract.figure_caption }}" class="img-fluid img-rounded img-shadow mb-2">
             {% if abstract.figure_caption %}
-            <p class="figure-caption">{{ abstract.figure_caption }}</p>
+            <p class="fst-italic text-muted mb-0">{{ abstract.figure_caption }}</p>
             {% endif %}
         </div>
 		{% endif %}
         
         <div class="info-grid">
             <div class="info-item">
-                <div class="info-label">Funding Sources</div>
-                <div class="info-value">
-                    {% if abstract.funding_sources %}
-                    {{ abstract.funding_sources }}
-                    {% else %}
-                    Not specified
-                    {% endif %}
-                </div>
+                <div class="info-label mb-1">Funding Sources</div>
+                <div class="info-value">{{ abstract.funding_sources|default:"Not specified" }}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">Publications</div>
-                <div class="info-value">
-                    {% if abstract.publications %}
-                    {{ abstract.publications }}
-                    {% else %}
-                    Not specified
-                    {% endif %}
-                </div>
+                <div class="info-label mb-1">Publications</div>
+                <div class="info-value">{{ abstract.publications|default:"Not specified" }}</div>
             </div>
         </div>
 
         <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Research Area</div>
-                <div class="info-value">{{ abstract.research_area }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Research Group</div>
-                <div class="info-value">{{ abstract.research_group }}</div>
-            </div>
+            <div class="info-item"><div class="info-label mb-1">Research Area</div><div class="info-value">{{ abstract.research_area }}</div></div>
+            <div class="info-item"><div class="info-label mb-1">Research Group</div><div class="info-value">{{ abstract.research_group }}</div></div>
             {% if abstract.graduation_date %}
-            <div class="info-item">
-                <div class="info-label">Graduation Date</div>
-                <div class="info-value">
-                    {{ abstract.graduation_date|date:"F j, Y" }}
-				</div>
-            </div>
+            <div class="info-item"><div class="info-label mb-1">Graduation Date</div><div class="info-value">{{ abstract.graduation_date|date:"F j, Y" }}</div></div>
             {% endif %}
         </div>
 
-        <h3 class="section-title">Presenter: {{ abstract.attendee.first_name }} {{ abstract.attendee.last_name }}</h3>
+        <h3 class="mt-4 mb-2">Presenter: {{ abstract.attendee.first_name }} {{ abstract.attendee.last_name }}</h3>
         <div class="info-item">
-            <div class="info-label">Affiliation</div>
+            <div class="info-label mb-1">Affiliation</div>
             <div class="info-value">{{ abstract.attendee.affiliation }}, {{ abstract.attendee.get_status_display }}</div>
         </div>
 
         <div class="info-item">
-			<div class="info-label">Seeking</div>
+			<div class="info-label mb-1">Seeking</div>
 			<div class="info-value">
 				{% if abstract.seeking_internships %}
-                <span class="flag-icon flag-internship">
-                    <i class="bi bi-briefcase"></i> Internships
-                </span>
+                <span class="badge-yellow me-2"><i class="bi bi-briefcase"></i> Internships</span>
 				{% endif %}
-				
 				{% if abstract.seeking_positions %}
-                <span class="flag-icon flag-position">
-                    <i class="bi bi-buildings"></i> Positions
-                </span>
+                <span class="badge-pink"><i class="bi bi-buildings"></i> Positions</span>
 				{% endif %}
             </div>
         </div>
 
         {% if abstract.resume %}
-        <p class="section-title">Resume</p>
-        <a href="{{ abstract.resume.url }}" class="download-btn" download>
+        <h3 class="mt-4 mb-2">Resume</h3>
+        <a href="{{ abstract.resume.url }}" class="btn btn-primary btn-rounded mb-4" download>
             <i class="bi bi-file-earmark-pdf"></i> Download Resume
         </a>
         {% endif %}
@@ -249,8 +67,6 @@
     </div>
 </div>
 <div class="content-section">
-    <a href="{% url 'abstracts' conference.year %}" class="back-link">
-        <i class="bi bi-arrow-left"></i> Back to Sessions
-    </a>
+    <a href="{% url 'abstracts' conference.year %}" class="link-primary"><i class="bi bi-arrow-left"></i> Back to Sessions</a>
 </div>
 {% endblock %}

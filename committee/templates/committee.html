@@ -1,56 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Committee{% endblock %}
-{% block extend_style %}
-<style>
- .committee-div {
-	 display: grid;
-	 grid-template-columns: 1fr 1fr;
-	 width: 100%;
- }
-
- .committee-entry {
-	 width: 100%;
- }
-
- .committee-photo {
-	 height: 210px;
- }
-
- @media (max-width: 768px) {
-	 .committee-div {
-		 display: block;
-		 width: 100%;
-	 }
-
-	 .committee-entry {
-		 width: 100%;
-	 }
-
-	 .committee-photo {
-		 height: 105px;
-	 }
- }
- 
- @media (max-width: 576px) {
-
-	 .committee-photo {
-		 height: 80px;
-	 }
- }
-</style>
-{% endblock %}{% block content %}
-<div class="content-section">
+{% block title %}Committee{% endblock %}{% block content %}
+<div class="content-section grid-2">
 {% for member in members %}
-<div class='committee-entry'>
+<div class="card">
 	{% if member.profile_image %}
-	<img src="/media/{{member.profile_image}}" class='committee-photo' />
+	<img src="/media/{{member.profile_image}}" class="img-rounded img-shadow grid-photo mb-3" alt="{{ member.first_name }} {{ member.last_name }}" />
 	{% endif %}
 	<h2>{{member.first_name}} {{member.last_name}}</h2>
-	<p>{{member.role}} Chair</p>
-	<p>Email: <a href="mailto:{{member.email}}">{{member.email}}</a></p>
-	{% if member.status and member.group %}
-	<p>{{member.status}} in {{member.group}}</p>
-	{% endif %}
+	<p class="text-primary">{{member.role}} Chair</p>
+	<p class="text-muted">Email: <a href="mailto:{{member.email}}" class="link-muted">{{member.email}}</a></p>
+	{% if member.status and member.group %}<p class="text-muted">{{member.status}} in {{member.group}}</p>{% endif %}
 </div>
 {% endfor %}
 </div>

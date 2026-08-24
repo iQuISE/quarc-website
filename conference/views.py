@@ -63,7 +63,7 @@ def registration_abstract_submission(request, year):
 
     if request.method == 'POST':
         attendee_form = AttendeeForm(data=request.POST)
-        marc_form = LogisticsMARCForm(data=request.POST)
+        marc_form = MARCForm(data=request.POST)
         abstract_form = AbstractForm(data=request.POST)
 
         attendee_form.instance.quarc = conf
@@ -85,7 +85,7 @@ def registration_abstract_submission(request, year):
                               {'conference': conf, 'show_countdown': False})
     else:
         attendee_form = AttendeeForm()
-        marc_form = LogisticsMARCForm()
+        marc_form = MARCForm()
         abstract_form = AbstractForm()
 
     return render(request, 'registration_abstract.html',
@@ -106,7 +106,7 @@ def registration_university_industry(request, year):
 
     if request.method == 'POST':
         attendee_form = AttendeeForm(data=request.POST)
-        marc_form = LogisticsMARCForm(data=request.POST)
+        marc_form = MARCForm(data=request.POST)
 
         attendee_form.instance.quarc = conf
 
@@ -124,7 +124,7 @@ def registration_university_industry(request, year):
                               {'conference': conf, 'show_countdown': False})
     else:
         attendee_form = AttendeeForm()
-        marc_form = LogisticsMARCForm()
+        marc_form = MARCForm()
 
     return render(request, 'registration_university_industry.html',
                   {'conference': conf, 'show_countdown': False,

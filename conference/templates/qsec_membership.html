@@ -1,62 +1,24 @@
 {% extends "base.html" %}
-{% block title %}QSEC Membership{% endblock %}
-{% block extend_style %}
-<style>
- .qsec-div {
-	 display: flex;
-	 justify-content: center;
-	 width: 100%;
-	 flex-wrap: wrap;
- }
-
- .qsec-entry {
-	 margin: 20px 20px 0px 20px;
-	 padding: 10px 10px 0px 10px;
-	 border-radius: 10px;
-	 width: 28%;
-	 background: var(--primary-color);
-	 text-align: center;
- }
-
- .qsec-entry h2::after {}
-
- @media (max-width: 768px) {
-	 .qsec-entry {
-		 width: 48%;
-	 }
- }
-
- @media (max-width: 576px) {
-	 .qsec-entry {
-		 width: 100%;
-	 }
- }
-</style>
-{% endblock %}
-{% block content %}
+{% block title %}QSEC Membership{% endblock %}{% block content %}
 <div class="content-section">
 	<h1>QSEC Membership</h1>
-	<p>MIT has a long tradition of engagement with industrial partners to formulate and drive new research areas. In the quantum space, the Quantum Science and Engineering Consortium (QSEC) links blue-chip corporations, startups, venture capital firms, The Engine, and more to MIT’s students, faculty, and staff.</p>
-<p>QuARC {{conference.year}} is hosted by MIT’s Center for Quantum Engineering (CQE) in partnership with MIT’s Interdisciplinary Quantum Information Science and Engineering (iQuISE) student organization. We are delighted to welcome QSEC members to MIT and its vibrant ecosystem of quantum researchers!</p>
-<p>QSEC is an ever-growing organization. For information on how to join, please see <a href="https://cqe.mit.edu/qsec/">here</a>.</p>
+	<p>MIT has a long tradition of engagement with industrial partners to formulate and drive new research areas. In the quantum space, the Quantum Science and Engineering Consortium (QSEC) links blue-chip corporations, startups, venture capital firms, The Engine, and more to MIT's students, faculty, and staff.</p>
+<p>QuARC {{conference.year}} is hosted by MIT's Center for Quantum Engineering (CQE) in partnership with MIT's Interdisciplinary Quantum Information Science and Engineering (iQuISE) student organization. We are delighted to welcome QSEC members to MIT and its vibrant ecosystem of quantum researchers!</p>
+<p>QSEC is an ever-growing organization. For information on how to join, please see <a href="https://cqe.mit.edu/qsec/" class="link-primary">here</a>.</p>
 </div>
 <div class="content-section">
 	<h1>QSEC Founding Members</h1>
-	<div class='qsec-div'>
+	<div class="flex-wrap">
 		{% for member in founding_members %}
-		<div class='qsec-entry'>
-			<h2>{{member}}</h2>
-		</div>
+		<div class="flex-item bg-primary text-white"><h2>{{member}}</h2></div>
 		{% endfor %}
 	</div>
 </div>
 <div class="content-section">
 	<h1>QSEC Members</h1>
-	<div class='qsec-div'>
+	<div class="flex-wrap">
 		{% for member in members %}
-		<div class='qsec-entry'>
-			<h2>{{member}}</h2>
-		</div>
+		<div class="flex-item bg-primary text-white"><h2>{{member}}</h2></div>
 		{% endfor %}
 	</div>
 </div>
