@@ -2,7 +2,7 @@
 {% block content %}
 <div class="content-section">
 	<h2>Registration (No Abstract)</h2>
-	<p> Registration form for industry affiliates, as well as postdocs and researchers who are not submitting abstracts to QuARC {{conference.year}}. Please register by {{ conference.registration_end|date:"F jS, Y" }}. Note that students must submit abstracts to attend QuARC and should therefore direct themselves to the <a href="/quarc{{conference.year}}/abstract_submission">Abstract Submission</a> page.</p>
+	<p> Registration form for industry affiliates, as well as postdocs and researchers who are not submitting abstracts to QuARC {{conference.year}}. Please register by {{ conference.registration_end|date:"F jS, Y" }}. Note that students must submit abstracts to attend QuARC and should therefore direct themselves to the <a href="/quarc{{conference.year}}/abstract-submission">Abstract Submission</a> page.</p>
 	<ul>
 		{% for error in errors %}
 		{{error}}
