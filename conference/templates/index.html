@@ -25,7 +25,7 @@
 		<li>Quantum Sensing and Imaging</li>
 		<li>Optics and Photonics</li>
 	</ul>
-	<p><strong>NOTE</strong> that <strong>QuARC</strong> {{conference.year}} will be held in conjunction with <strong>MARC</strong> {{conference.year}}, which will take place on {{ conference.marc_start_date|date:"F jS" }} and {{ conference.marc_end_date|date:"jS, Y" }}. MIT students and faculty&mdash;as well as industry affiliates&mdash;are welcome and encouraged to attend both events and experience the diversity of research that MIT has to offer.</p>
+	<p><strong>NOTE</strong> that <strong>QuARC</strong> {{conference.year}} will be held in conjunction with <strong>MARC</strong> {{conference.year}}, which will take place{% if conference.marc_start_date and conference.marc_end_date %} on {{ conference.marc_start_date|date:"F jS" }} and {{ conference.marc_end_date|date:"jS, Y" }}{% endif %}. MIT students and faculty&mdash;as well as industry affiliates&mdash;are welcome and encouraged to attend both events and experience the diversity of research that MIT has to offer.</p>
 	<p>Students who are attending both <strong>QuARC</strong> and <strong>MARC</strong> are expected to submit a poster at <strong>QuARC</strong> and are highly encouraged to submit a poster to <strong>MARC</strong>. They may use the same poster for both events. <em>Students attending both <strong>QuARC</strong> and <strong>MARC</strong> must register for both events.</em></p>
 	<p>Please join us in advancing the academic and industrial frontiers of quantum science and engineering!</p>
 	<h2>Conference Highlights</h2>

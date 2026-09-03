@@ -69,6 +69,14 @@ def registration_abstract_submission(request, year):
 
         attendee_form.instance.quarc = conf
 
+        if not attendee_form.is_valid():
+            if '__all__' in attendee_form.errors:
+                if 'is already attending QuARC' in str(attendee_form.errors['__all__'][0]):
+                    # They already submitted, reset their entry and allow re-submit
+                    email = attendee_form.cleaned_data['email']
+                    Attendee.objects.filter(quarc=conf, email__iexact=email).delete()
+                    attendee_form = AttendeeForm(data=request.POST)
+
         if attendee_form.is_valid():
             attendee = attendee_form.save(commit=False)
 
@@ -84,7 +92,12 @@ def registration_abstract_submission(request, year):
 
                 attendee = attendee_form.save()
                 marc_form.save()
-                abstract_form.save()
+                abstract = abstract_form.save()
+
+                # Link authored abstract to attendee
+                attendee.authored_abstract = abstract
+                attendee.save()
+
                 return render(request, 'registration_success.html',
                               {'conference': conf, 'show_countdown': False})
     else:

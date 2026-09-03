@@ -2,7 +2,7 @@
 {% block content %}
 <div class="content-section">
 	<h2>Registration (No Abstract)</h2>
-	<p> Registration form for industry affiliates, as well as postdocs and researchers who are not submitting abstracts to QuARC {{conference.year}}. Please register by {{ conference.registration_end|date:"F jS, Y" }}. Note that students must submit abstracts to attend QuARC and should therefore direct themselves to the <a href="/quarc{{conference.year}}/abstract-submission">Abstract Submission</a> page.</p>
+	<p> Registration form for industry affiliates, as well as postdocs and researchers who are not submitting abstracts to QuARC {{conference.year}}. Please register by {{ conference.registration_end|date:"F jS, Y" }}. Note that students must submit abstracts to attend QuARC and should therefore direct themselves to the <a href="/quarc{{conference.year}}/abstract-submission">Abstract Submission</a> page. Student co-authors may complete this form </p>
 	<ul>
 		{% for error in errors %}
 		{{error}}
@@ -39,8 +39,9 @@
             <select class="form-select" id="id_status" name="status" required>
 				<option value="null">Select status...</option>
 				{% for status in status_choices %}
-				<option value="{{status.0}}"
-				{% if status.0 == attendee_form.instance.status %}selected{% endif %}>{{status.1}}</option>
+				<option value="{{status.0}}"{% if status.0 == attendee_form.instance.status %}selected{% endif %}>
+					{% if status.1 == "Graduate Student" or status.1 == "Undergraduate Student" %}{{status.1}} (Co-author only)
+					{% else %}{{status.1}}{% endif %}</option>
 				{% endfor %}
             </select>
             <small class="form-text text-muted">University or industry affiliation.</small>

@@ -114,9 +114,26 @@ class AttendeeLogisticsSwagInline(AttendeeLogisticsInline):
 class AttendeeLogisticsBusInline(AttendeeLogisticsInline):
     model = Bus
 
+@admin.display(description='Abstract Title')
+def abstract_title(attendee):
+    if attendee.authored_abstract:
+        return attendee.authored_abstract.title
+    else:
+        return attendee.abstract_title
+
+@admin.display(description='Abstract Content')
+def abstract_content(attendee):
+    if attendee.authored_abstract:
+        return attendee.authored_abstract.abstract
+    else:
+        return ''
+
 class AttendeeAdmin(admin.ModelAdmin):
     list_filter = [QuARCFilter, AttendeeAcceptedFilter, AttendeeDroppedFilter, 'status',
                    AttendeeLogisticsFilter]
+    list_display = ['first_name', 'last_name', 'email', abstract_title, abstract_content]
+    fields = ['quarc', ('first_name', 'middle_name', 'last_name', 'suffix'),
+              'email', ('status', 'affiliation'), 'authored_abstract', 'abstract_title']
     actions = [accept_attendees, reject_attendees]
     inlines = (AttendeeAbstractInline, AttendeeAcceptanceInline,
                AttendeeLogisticsMARCInline, AttendeeLogisticsDinnerInline,

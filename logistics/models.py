@@ -95,7 +95,7 @@ class HousingAssignments(LogisticsModel):
                    self.roommate.first_name, self.roommate.last_name))
 
     def clean(self):
-        if self.roommate.quarc != self.attendee.quarc:
+        if self.roommate is not None and self.roommate.quarc != self.attendee.quarc:
             raise ValidationError('Roommate QuARC does not match attendee QuARC')
         super().clean()
 

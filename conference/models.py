@@ -12,17 +12,17 @@ class QuARCConference(models.Model):
                                               MaxValueValidator(100)], unique=True)
     start_date = models.DateField()
     end_date = models.DateField()
-    start_time = models.TimeField(blank=True)
-    marc_start_date = models.DateField(blank=True)
-    marc_end_date = models.DateField(blank=True)
-    registration_start = models.DateField(blank=True)
-    registration_end = models.DateField(blank=True)
+    start_time = models.TimeField(blank=True, null=True)
+    marc_start_date = models.DateField(blank=True, null=True)
+    marc_end_date = models.DateField(blank=True, null=True)
+    registration_start = models.DateField(blank=True, null=True)
+    registration_end = models.DateField(blank=True, null=True)
     abstract_submission_active = models.BooleanField(null=False, default=False)
     university_industry_registration_active = models.BooleanField(null=False, default=False)
     logistics_form_active = models.BooleanField(null=False, default=False)
     program_active = models.BooleanField(null=False, default=False)
-    logo = models.ImageField(upload_to='logos', blank=True)
-    homepage_image = models.ImageField(upload_to='homepage_images', blank=True)
+    logo = models.ImageField(upload_to='logos', blank=True, null=True)
+    homepage_image = models.ImageField(upload_to='homepage_images', blank=True, null=True)
     primary_color = models.CharField(max_length=32, blank=False, default='#2ea3f2')
     secondary_color = models.CharField(max_length=32, blank=False, default='#8300e9')
     dark_color = models.CharField(max_length=32, blank=False, default='#1a1a1a')
@@ -42,8 +42,8 @@ class Attendee(models.Model):
         Postdoctoral_Researcher = 2
         Research_Staff = 3
         University_Faculty = 4
-        Organizing_Committee = 5
         Undergraduate_Student = 6
+        Organizing_Committee = 50
         Other = 100
 
     quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
@@ -54,6 +54,10 @@ class Attendee(models.Model):
     email = models.EmailField(blank=False, unique=True)
     status = models.IntegerField(choices=Status.choices, null=False)
     affiliation = models.CharField(max_length=64, blank=True)
+    authored_abstract = models.ForeignKey('conference.Abstract', on_delete=models.SET_NULL,
+                                          null=True, related_name='authored_abstract')
+    # Abstract title used for co-authors
+    abstract_title = models.CharField(max_length=128, blank=True, null=True)
 
     def __str__(self):
         return '%s %s' % (self.first_name, self.last_name)
@@ -112,7 +116,7 @@ class Abstract(models.Model):
     graduation_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
-        return '%s %s' % (self.attendee.first_name, self.attendee.last_name)
+        return '%s' % self.title
 
 class QSECMember(models.Model):
     company_name = models.CharField(max_length=64, blank=False)

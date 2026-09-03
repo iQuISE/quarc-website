@@ -31,6 +31,8 @@ class QuARCFilter(admin.SimpleListFilter):
             return queryset
 
         quarcs = QuARCConference.objects
+        if quarcs.count() == 0:
+            return queryset
         if self.value() == None:
             year = quarcs.order_by('year').last().year
         else:
