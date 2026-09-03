@@ -4,7 +4,7 @@ from django.db import models
 
 from datetime import datetime
 
-from conference.models import QuARCConference, QuARCQSECMembers, Attendee, ProgramEvent, Session, SessionAbstract, Abstract
+from conference.models import QuARCConference, QuARCQSECMembers, Attendee, ProgramEvent, Session, SessionAbstract, Abstract, ResearchArea, ResearchGoal
 from conference.forms import AttendeeForm, AbstractForm
 
 from logistics.models import Acceptance
@@ -79,6 +79,9 @@ def registration_abstract_submission(request, year):
             abstract_form.instance.attendee = attendee
 
             if marc_form.is_valid() and abstract_form.is_valid():
+                if abstract_form.instance.research_area == 'other':
+                    abstract_form.instance.research_area = request.POST['research_area_other']
+
                 attendee = attendee_form.save()
                 marc_form.save()
                 abstract_form.save()
@@ -93,6 +96,8 @@ def registration_abstract_submission(request, year):
                   {'conference': conf, 'show_countdown': False,
                    'attendee_form': attendee_form,
                    'status_choices': Attendee.Status.choices,
+                   'research_areas': ResearchArea.objects.filter(quarc=conf),
+                   'research_goals': ResearchGoal.objects.filter(quarc=conf),
                    'marc_form': marc_form,
                    'abstract_form': abstract_form})
 

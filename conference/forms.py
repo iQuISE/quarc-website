@@ -19,9 +19,8 @@ class AttendeeForm(ModelForm):
         cleaned_data = super(AttendeeForm, self).clean()
         email = cleaned_data.get('email')
         email_confirm = cleaned_data.get('email_confirm')
-        print('{} and {}'.format(email, email_confirm))
         if email != email_confirm:
-            self.add_error('email', 'Emails do not catch')
+            self.add_error('email', 'Emails do not match')
 
 class AbstractForm(ModelForm):
     class Meta:
@@ -38,6 +37,7 @@ class AbstractForm(ModelForm):
                   'elevator_pitch',
                   'oral_presentation',
                   'research_area',
+                  'research_goal',
                   'research_group',
                   'cqe_feature',
                   'resume',

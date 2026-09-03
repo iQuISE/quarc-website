@@ -54,7 +54,6 @@
 							   {% if status.0 == attendee_form.instance.status %}selected{% endif %}>{{status.1}}</option>
 				{% endfor %}
             </select>
-            <small class="form-text text-muted">University or industry affiliation.</small>
 		</div>
 		<div class="mb-3">
             <label for="id_attending_marc" class="form-label">Are you planning to register for MARC {{conference.year}}?<span class="text-danger">*</span></label>
@@ -121,15 +120,36 @@
             </div>
         </div>
 		<div class="row mb-3">
-            <div class="col-md-4">
+            <div class="col-md-6">
 				<label for="id_research_area" class="form-label">Research Area <span class="text-danger">*</span></label>
-				<input type="text" class="form-control" id="id_research_area" name="research_area" value="{{abstract_form.instance.research_area}}" required>
+				<select class="form-select" id="id_research_area" name="research_area" required>
+					<option value="null">Select area...</option>
+					{% for area in research_areas %}
+					<option value="{{area}}"
+							{% if area == attendee_form.instance.research_area %}selected{% endif %}>{{area}}</option>
+					{% endfor %}
+					<option value="other"
+							{% if "other" == attendee_form.instance.research_area %}selected{% endif %}>Other</option>
+				</select>
+				<input type="text" class="form-control" id="id_research_area_other" name="research_area_other" value="{{attendee_form.instance.research_area}}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
+				<label for="id_research_goal" class="form-label">Research Goal <span class="text-danger">*</span></label>
+				<select class="form-select" id="id_research_goal" name="research_goal" required>
+					<option value="null">Select goal...</option>
+					{% for goal in research_goals %}
+					<option value="{{goal}}"
+							{% if goal == attendee_form.instance.research_goal %}selected{% endif %}>{{goal}}</option>
+					{% endfor %}
+				</select>
+            </div>
+		</div>
+		<div class="row mb-3">
+            <div class="col-md-6">
 				<label for="id_research_group" class="form-label">Research Group <span class="text-danger">*</span></label>
 				<input type="text" class="form-control" id="id_research_group" name="research_group" value="{{abstract_form.instance.research_group}}" required>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
 				<label for="id_graduation_date" class="form-label">Graduation Date</label>
 				<input type="date" class="form-control" id="id_graduation_date" name="graduation_date" value="{{abstract_form.instance.graduation_date}}">
             </div>
@@ -190,4 +210,23 @@
     </div>
 	</form>
 </div>
+{% endblock %}
+{% block extend_scripts %}
+<script>
+ document.addEventListener('DOMContentLoaded', function() {
+     const researchAreaSelector = document.getElementById('id_research_area');
+     const researchAreaOther = document.getElementById('id_research_area_other');
+	 function updateResearchAreaOther(){
+		 if(researchAreaSelector.value === 'other'){
+			 researchAreaOther.style.display = researchAreaOther.hidden_style;
+		 }
+		 else{
+			 researchAreaOther.hidden_style = researchAreaOther.style.display;
+			 researchAreaOther.style.display = 'none';
+		 }
+	 }
+     researchAreaSelector.addEventListener('change', updateResearchAreaOther);
+     updateResearchAreaOther();
+ });
+</script>
 {% endblock %}

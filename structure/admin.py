@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.template.response import TemplateResponse
 
-from structure.models import QuARCConferenceProxy, QSECMemberProxy, QuARCQSECMembersProxy, ProgramEventProxy, DinnerOptionsProxy, SwagOptionsProxy
+from structure.models import QuARCConferenceProxy, QSECMemberProxy, QuARCQSECMembersProxy, ProgramEventProxy, DinnerOptionsProxy, SwagOptionsProxy, ResearchAreaProxy, ResearchGoalProxy
 
 from conference.admin import QuARCAdmin
 
@@ -10,6 +10,8 @@ admin.site.register(QuARCConferenceProxy)
 
 admin.site.register(QuARCQSECMembersProxy, QuARCAdmin)
 admin.site.register(ProgramEventProxy, QuARCAdmin)
+admin.site.register(ResearchAreaProxy, QuARCAdmin)
+admin.site.register(ResearchGoalProxy, QuARCAdmin)
 
 @admin.action(description="Add QSEC members to QuARC conference")
 def add_qsec_to_quarc(modeladmin, request, queryset):

@@ -3,7 +3,7 @@ from django.db import models
 '''Proxy models for aspects of the conference and logistics
 that are part of the structure of the conference, rather than operations.'''
 
-from conference.models import QuARCConference, QSECMember, QuARCQSECMembers, ProgramEvent
+from conference.models import QuARCConference, QSECMember, QuARCQSECMembers, ProgramEvent, ResearchArea, ResearchGoal
 from logistics.models import DinnerOptions, SwagOptions
 
 class QuARCConferenceProxy(QuARCConference):
@@ -27,8 +27,20 @@ class QuARCQSECMembersProxy(QuARCQSECMembers):
 class ProgramEventProxy(ProgramEvent):
     class Meta:
         proxy = True
-        verbose_name = 'QuARC Event'
-        verbose_name_plural = 'QuARC Events'
+        verbose_name = 'Conference Event'
+        verbose_name_plural = 'Conference Events'
+
+class ResearchAreaProxy(ResearchArea):
+    class Meta:
+        proxy = True
+        verbose_name = 'Research Area'
+        verbose_name_plural = 'Research Areas'
+
+class ResearchGoalProxy(ResearchGoal):
+    class Meta:
+        proxy = True
+        verbose_name = 'Research Goal'
+        verbose_name_plural = 'Research Goals'
 
 class DinnerOptionsProxy(DinnerOptions):
     class Meta:

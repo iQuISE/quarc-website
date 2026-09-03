@@ -65,6 +65,32 @@ class Attendee(models.Model):
             raise ValidationError('{} is already attending QuARC {}.'.format(self.email, self.quarc.year))
         super().validate_unique(exclude=exclude)
 
+class ResearchArea(models.Model):
+    '''For display in forms only, actual research area is stored as string
+    in order to accommodate "other".'''
+    quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
+    research_area = models.CharField(max_length=64, blank=False)
+
+    def __str__(self):
+        return '%s' % (self.research_area)
+
+    class Meta:
+        verbose_name = 'Research Area'
+        verbose_name_plural = 'Research Areas'
+
+class ResearchGoal(models.Model):
+    '''For display in forms only, actual research goal is stored as string
+    in order to accommodate "other".'''
+    quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
+    research_goal = models.CharField(max_length=64, blank=False)
+
+    def __str__(self):
+        return '%s' % (self.research_goal)
+
+    class Meta:
+        verbose_name = 'Research Goal'
+        verbose_name_plural = 'Research Goals'
+
 class Abstract(models.Model):    
     attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
     title = models.CharField(max_length=128, blank=False)
@@ -79,6 +105,7 @@ class Abstract(models.Model):
     elevator_pitch = models.BooleanField(null=False)
     oral_presentation = models.BooleanField(null=False)
     research_area = models.CharField(max_length=64)
+    research_goal = models.CharField(max_length=64)
     research_group = models.CharField(max_length=64)
     cqe_feature = models.BooleanField(null=False)
     resume = models.FileField(upload_to='resumes', blank=True)
@@ -128,8 +155,8 @@ class ProgramEvent(models.Model):
         return 'QuARC %d %s' % (self.quarc.year, self.event)
 
     class Meta:
-        verbose_name = 'QuARC Event'
-        verbose_name_plural = 'QuARC Events'
+        verbose_name = 'Conference Event'
+        verbose_name_plural = 'Conference Events'
 
 class Session(models.Model):
     quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)

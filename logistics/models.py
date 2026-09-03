@@ -17,8 +17,6 @@ class LogisticsModel(models.Model):
         if self.latest:
             attendee_pk = self.attendee.pk
             logistics_pk = self.pk
-            print(attendee_pk)
-            print(logistics_pk)
             # Ensure there is only one latest entry.
             conflict = self.__class__.objects.filter(attendee_id=attendee_pk, latest=True).exclude(pk=logistics_pk)
             if conflict.exists():
