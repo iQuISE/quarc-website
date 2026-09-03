@@ -44,7 +44,11 @@
 					{% else %}{{status.1}}{% endif %}</option>
 				{% endfor %}
             </select>
-            <small class="form-text text-muted">University or industry affiliation.</small>
+		</div>
+		<div class="mb-3" id="student-coauthor">
+            <label for="id_status" class="form-label">Abstract Title <span class="text-danger">*</span></label>
+			<input type="text" class="form-control" id="id_abstract_title" name="abstract_title" value="{{attendee_form.instance.abstract_title}}" required>
+			<p>Students <strong>must</strong> be co-authors of a submitted abstract. If the abstract title above does not match, you will not be accepted.</p>
 		</div>
 		<div class="mb-3">
             <label for="id_attending_marc" class="form-label">Are you planning to register for MARC {{conference.year}}?<span class="text-danger">*</span></label>
@@ -58,4 +62,25 @@
 		</div>
 	</form>
 </div>
+{% endblock %}
+{% block extend_scripts %}
+<script>
+ document.addEventListener('DOMContentLoaded', function() {
+     const statusSelector = document.getElementById('id_status');
+     const statusStudent = document.getElementById('student-coauthor');
+	 function updateStatusStudent(){
+		 if(statusSelector.value == 1 || statusSelector.value == 6){
+			 statusStudent.style.display = statusStudent.hidden_style;
+			 document.getElementById("id_abstract_title").required = true;
+		 }
+		 else{
+			 statusStudent.hidden_style = statusStudent.style.display;
+			 statusStudent.style.display = 'none';
+			 document.getElementById("id_abstract_title").required = false;
+		 }
+	 }
+     statusSelector.addEventListener('change', updateStatusStudent);
+     updateStatusStudent();
+ });
+</script>
 {% endblock %}
