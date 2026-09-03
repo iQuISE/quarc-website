@@ -237,4 +237,4 @@ def error_handler(request, exception=None, status_code=404):
                    'error_code': status_code, 'error_message': error_message})
 
 def page_not_found(request, exception):
-    return error_message(request, exception)
+    return error_handler(request, exception)
