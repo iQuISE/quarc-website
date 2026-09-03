@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse, path
 
-from logistics.models import Acceptance, MARC, HousingPreferences, HousingAssignments, DinnerOptions, Dinner, Activities, SwagOptions, Swag, Buses, Bus
+from logistics.models import Acceptance, MARC, HousingPreferences, HousingAssignments, Dinner, Activities, Swag, Buses, Bus
 from logistics.admin_filters import *
 from logistics.housing_assignment import assign_housing
 
@@ -18,8 +18,6 @@ from functools import update_wrapper
 class QuARCAdmin(admin.ModelAdmin):
     list_filter = [QuARCFilter]
 
-admin.site.register(DinnerOptions, QuARCAdmin)
-admin.site.register(SwagOptions, QuARCAdmin)
 admin.site.register(Buses, QuARCAdmin)
 
 @admin.action(description='Export logistics to CSV')

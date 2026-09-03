@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'committee.apps.CommitteeConfig',
     'conference.apps.ConferenceConfig',
     'logistics.apps.LogisticsConfig',
+    'structure.apps.StructureConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

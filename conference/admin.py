@@ -2,10 +2,9 @@ from django.conf import settings
 from django.contrib import admin
 from django.db import models
 from django.http import HttpResponse
-from django.template.response import TemplateResponse
 from wsgiref.util import FileWrapper
 
-from conference.models import QuARCConference, QSECMember, QuARCQSECMembers, Attendee, Abstract, ProgramEvent, Session, SessionAbstract
+from conference.models import Attendee, Abstract, Session, SessionAbstract
 from conference.forms import AbstractForm
 from conference.admin_filters import *
 
@@ -18,39 +17,8 @@ import os
 import tempfile, zipfile
 
 # The admin panel for creating and managing conference objects
-admin.site.register(QuARCConference)
-
 class QuARCAdmin(admin.ModelAdmin):
     list_filter = [QuARCFilter]
-
-admin.site.register(QuARCQSECMembers, QuARCAdmin)
-admin.site.register(ProgramEvent, QuARCAdmin)
-
-@admin.action(description="Add QSEC members to QuARC conference")
-def add_qsec_to_quarc(modeladmin, request, queryset):
-    if 'post' in request.POST:
-        # Second call to this form, so we can now add the QSEC members
-        quarc = QuARCConference.objects.filter(year=int(request.POST['quarc']))[0]
-        for qsec_member in queryset:
-            QuARCQSECMembers.objects.create(quarc=quarc, qsec_member=qsec_member)
-        return None
-
-    quarcs = QuARCConference.objects.order_by('year')
-
-    context = {
-        **modeladmin.admin_site.each_context(request), 'title': f'Add QSEC to QuARC',
-        'action_checkbox_name': admin.helpers.ACTION_CHECKBOX_NAME,
-        'queryset': queryset, 'quarcs': quarcs,
-        'module_name': modeladmin.opts.verbose_name_plural, 'opts': modeladmin.opts
-    }
-
-    return TemplateResponse(request, 'admin/add_qsec_view.html', context)
-
-class QuARCQSECMembersAdmin(admin.ModelAdmin):
-    actions = [add_qsec_to_quarc]
-
-# For storing QSEC members; also has a function to associate them to a QuARC
-admin.site.register(QSECMember, QuARCQSECMembersAdmin)
 
 def add_attendee_acceptance(modeladmin, request, queryset, accepted):
     Acceptance.objects.filter(attendee__in=queryset.all()).update(latest=False)

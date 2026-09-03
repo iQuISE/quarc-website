@@ -7,6 +7,7 @@ from datetime import datetime
 class LogisticsModel(models.Model):
     attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
     edit_time = models.DateTimeField()
+    edit_reason = models.CharField(max_length=256, blank=True)
     latest = models.BooleanField(null=False, blank=False)
 
     class Meta:
