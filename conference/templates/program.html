@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Program - QuARC {{conference.year}}{% endblock %}{% block content %}
-{% if program_data %}
+{% if program_data and conference.program_active %}
 {% regroup program_data by date as events_by_date %}
 {% for date_group in events_by_date %}
 <div class="content-section">

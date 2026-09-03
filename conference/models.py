@@ -20,6 +20,7 @@ class QuARCConference(models.Model):
     abstract_submission_active = models.BooleanField(null=False, default=False)
     university_industry_registration_active = models.BooleanField(null=False, default=False)
     logistics_form_active = models.BooleanField(null=False, default=False)
+    program_active = models.BooleanField(null=False, default=False)
     logo = models.ImageField(upload_to='logos', blank=True)
     homepage_image = models.ImageField(upload_to='homepage_images', blank=True)
     primary_color = models.CharField(max_length=32, blank=False, default='#2ea3f2')

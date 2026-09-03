@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Sessions - QuARC {{conference.year}}{% endblock %}{% block content %}
-{% if sessions %}
+{% if sessions and conference.program_active %}
 {% for session in sessions %}
 <div class="content-section">
     <div class="gradient-header-sm">

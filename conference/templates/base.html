@@ -567,6 +567,7 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="/quarc{{conference.year}}">Home</a>
                     </li>
+					{% if conference.program_active %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="programDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Program
@@ -576,6 +577,7 @@
                             <li><a class="dropdown-item" href="/quarc{{conference.year}}/abstracts/">Abstract List</a></li>
                         </ul>
                     </li>
+					{% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="/quarc{{conference.year}}/committee">Committee</a>
                     </li>
