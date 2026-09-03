@@ -18,7 +18,29 @@ from functools import update_wrapper
 class QuARCAdmin(admin.ModelAdmin):
     list_filter = [QuARCFilter]
 
-admin.site.register(Buses, QuARCAdmin)
+class BusesAdmin(QuARCAdmin):
+    readonly_fields = ('leader_email', 'passengers')
+    fields = ['quarc', ('type', 'number'), ('capacity', 'passengers'),
+              ('leader', 'leader_email', 'leader_phone_number')]
+
+    list_display = ['quarc', 'type', 'number', 'capacity', 'passengers',
+                    'leader', 'leader_email', 'leader_phone_number']
+
+    def leader_email(self, bus):
+        if bus.leader:
+            return bus.leader.email
+        else:
+            return ''
+
+    def passengers(self, bus):
+        if bus.type == Buses.BusOption.Early or bus.type == Buses.BusOption.Late:
+            return Bus.objects.filter(latest=True, bus_to_assignment=bus).count()
+        elif bus.type == Buses.BusOption.Return:
+            return Bus.objects.filter(latest=True, bus_from_assignment=bus).count()
+        else:
+            return 0
+
+admin.site.register(Buses, BusesAdmin)
 
 @admin.action(description='Export logistics to CSV')
 def export_logistics_to_csv(modeladmin, request, queryset):

@@ -8,7 +8,7 @@ from conference.models import Attendee, Abstract, Session, SessionAbstract
 from conference.forms import AbstractForm
 from conference.admin_filters import *
 
-from logistics.models import Acceptance, MARC, HousingPreferences, HousingAssignments, Dinner, Activities, Swag, Bus
+from logistics.models import Acceptance, MARC, HousingPreferences, HousingAssignments, Dinner, Activities, Swag, Buses, Bus
 from logistics.admin_filters import AttendeeQuARCFilter, AcceptedFilter, DroppedFilter
 
 import csv
@@ -113,6 +113,16 @@ class AttendeeLogisticsSwagInline(AttendeeLogisticsInline):
     model = Swag
 class AttendeeLogisticsBusInline(AttendeeLogisticsInline):
     model = Bus
+class AttendeeLogisticsBusLeaderInline(admin.TabularInline):
+    model = Buses
+    fk_name = 'leader'
+    extra = 0
+    max_num = 1
+    show_change_link = True
+    exclude = ('quarc', 'capacity')
+    readonly_fields = ('type', 'number', 'leader_phone_number')
+    verbose_name = 'Bus Leader'
+    verbose_name_plural = 'Bus Leader'
 
 @admin.display(description='Abstract Title')
 def abstract_title(attendee):
@@ -142,6 +152,7 @@ class AttendeeAdmin(admin.ModelAdmin):
                AttendeeLogisticsHousingAssignmentsInline,
                AttendeeLogisticsSwagInline,
                AttendeeLogisticsBusInline,
+               AttendeeLogisticsBusLeaderInline,
                AttendeeLogisticsActivitiesInline,
                AttendeeLogisticsMARCInline)
 

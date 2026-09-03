@@ -215,6 +215,8 @@ class Buses(models.Model):
     type = models.IntegerField(choices=BusOption.choices, null=False, blank=False)
     number = models.IntegerField(null=False, blank=False)
     capacity = models.IntegerField(null=True, blank=True)
+    leader = models.ForeignKey(Attendee, on_delete=models.SET_NULL, null=True, blank=True)
+    leader_phone_number = models.CharField(max_length=16, null=True, blank=True)
 
     def __str__(self):
         return '%s Bus #%s' % (self.get_type_display(), self.number)

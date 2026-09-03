@@ -55,7 +55,8 @@ class Attendee(models.Model):
     status = models.IntegerField(choices=Status.choices, null=False)
     affiliation = models.CharField(max_length=64, blank=True)
     authored_abstract = models.ForeignKey('conference.Abstract', on_delete=models.SET_NULL,
-                                          null=True, related_name='authored_abstract')
+                                          null=True, blank=True,
+                                          related_name='authored_abstract')
     # Abstract title used for co-authors
     abstract_title = models.CharField(max_length=128, blank=True, null=True)
 
