@@ -9,10 +9,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
+			{% if conference %}
+            --primary-color: {{conference.primary_color}};
+            --secondary-color: {{conference.secondary_color}};
+            --dark-color: {{conference.dark_color}};
+            --light-color: {{conference.light_color}};
+			{% else %}
             --primary-color: #2ea3f2;
             --secondary-color: #8300e9;
             --dark-color: #1a1a1a;
             --light-color: #ffffff;
+			{% endif %}
         }
 
         * {
@@ -191,7 +198,7 @@
         }
 
         .countdown-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             border-radius: 15px;
             position: relative;
             color: white;
@@ -244,7 +251,7 @@
         }
 
         .footer {
-            background: linear-gradient(135deg, var(--secondary-color) 0%, #5a00b3 100%);
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
             color: white;
             padding: 40px 0 20px;
             margin-top: 60px;

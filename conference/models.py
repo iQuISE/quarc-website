@@ -22,6 +22,10 @@ class QuARCConference(models.Model):
     logistics_form_active = models.BooleanField(null=False, default=False)
     logo = models.ImageField(upload_to='logos', blank=True)
     homepage_image = models.ImageField(upload_to='homepage_images', blank=True)
+    primary_color = models.CharField(max_length=32, blank=False, default='#2ea3f2')
+    secondary_color = models.CharField(max_length=32, blank=False, default='#8300e9')
+    dark_color = models.CharField(max_length=32, blank=False, default='#1a1a1a')
+    light_color = models.CharField(max_length=32, blank=False, default='#ffffff')
 
     def __str__(self):
         return 'QuARC %d' % self.year
