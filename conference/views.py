@@ -6,17 +6,12 @@ from datetime import datetime
 
 from conference.models import QuARCConference, QuARCQSECMembers, Attendee, ProgramEvent, Session, SessionAbstract, Abstract, ResearchArea, ResearchGoal
 from conference.forms import AttendeeForm, AbstractForm
+from conference.utils import get_conference
 
 from logistics.models import Acceptance
 from logistics.forms import MARCForm
 
 import re
-
-def get_conference(year):
-    conferences = QuARCConference.objects.filter(year=year)
-    if len(conferences) == 0:
-        raise ValueError(f'No QuARC found for {year}')
-    return conferences[0]
 
 def index(request, year):
     try:

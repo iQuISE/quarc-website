@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.db import models
 
-from conference.views import get_conference
+from conference.utils import get_conference
 from conference.models import Attendee
 
 from logistics.models import Acceptance, HousingPreferences, DinnerOptions, Dinner, Activities, SwagOptions, Swag, Bus

@@ -1,9 +1,12 @@
 from django.contrib import admin
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 from conference.admin_filters import QuARCFilter
+from conference.models import QuARCConference
+from conference.utils import get_conference
 
-from logistics.models import Acceptance, HousingAssignments
+from logistics.models import Acceptance, Buses, HousingAssignments
 
 class AttendeeQuARCFilter(QuARCFilter):
     filter_column = 'attendee__quarc__year'
@@ -78,9 +81,25 @@ class LatestFilter(admin.SimpleListFilter):
 
 class BusFilter(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
-        return [('not_required', 'Not Required'),
-                ('not_assigned', 'Not Assigned'),
-                ('assigned', 'Assigned')]
+        base_list = [('not_required', 'Not Required'),
+                     ('not_assigned', 'Not Assigned'),
+                     ('assigned', 'Assigned')]
+
+        conf = None
+        if request.GET is not None and 'quarc' in request.GET:
+            try:
+                conf = get_conference(request.GET['quarc'])
+            except ValueError:
+                return base_list
+        if conf is None:
+            try:
+                conf = QuARCConference.objects.latest('year')
+            except ObjectDoesNotExist:
+                return base_list
+
+        buses = Buses.objects.filter(quarc=conf, type__in=self.bus_types)
+
+        return base_list + [(b.pk, f'On {str(b)}') for b in buses]
 
     def queryset(self, request, queryset):
         if self.value() == 'not_required':
@@ -89,16 +108,22 @@ class BusFilter(admin.SimpleListFilter):
             return queryset.filter(latest=True, **{self.parameter_name + '_required': True,
                                                    self.parameter_name + '_assignment': None})
         elif self.value() == 'assigned':
-            return (queryset.filter(latest=True, **{self.parameter_name + '_required': True})
+            return (queryset.filter(latest=True)
                     .filter(~models.Q(**{self.parameter_name + '_assignment': None})))
+        elif self.value() is not None:
+            print(self.value())
+            return queryset.filter(latest=True,
+                                   **{self.parameter_name + '_assignment': self.value()})
         return queryset
 
 class BusToFilter(BusFilter):
     title = 'Bus To'
     parameter_name = 'bus_to'
+    bus_types = [0, 1]
 class BusFromFilter(BusFilter):
     title = 'Bus From'
     parameter_name = 'bus_from'
+    bus_types = [2]
 
 class DinnerRestrictionFilter(admin.SimpleListFilter):
     title = 'Dietary Restrictions'
