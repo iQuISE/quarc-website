@@ -9,7 +9,11 @@ from conference.admin import QuARCAdmin
 admin.site.register(QuARCConferenceProxy)
 
 admin.site.register(QuARCQSECMembersProxy, QuARCAdmin)
-admin.site.register(ConferenceEventProxy, QuARCAdmin)
+
+class ConferenceEventAdmin(QuARCAdmin):
+    list_display = ['event', 'location', 'date', 'start_time', 'end_time', 'description']
+admin.site.register(ConferenceEventProxy, ConferenceEventAdmin)
+
 admin.site.register(ResearchAreaProxy, QuARCAdmin)
 admin.site.register(ResearchGoalProxy, QuARCAdmin)
 
