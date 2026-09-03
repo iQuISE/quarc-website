@@ -38,11 +38,12 @@ class QuARCConference(models.Model):
 class Attendee(models.Model):
     class Status(models.IntegerChoices):
         Industry_Personnel = 0
-        Student = 1
+        Graduate_Student = 1
         Postdoctoral_Researcher = 2
         Research_Staff = 3
         University_Faculty = 4
         Organizing_Committee = 5
+        Undergraduate_Student = 6
         Other = 100
 
     quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
