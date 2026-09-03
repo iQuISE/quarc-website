@@ -42,7 +42,7 @@ class Attendee(models.Model):
         Postdoctoral_Researcher = 2
         Research_Staff = 3
         University_Faculty = 4
-        QuARC_Chair = 5
+        Organizing_Committee = 5
         Other = 100
 
     quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
