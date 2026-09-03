@@ -147,7 +147,7 @@ class QuARCQSECMembers(models.Model):
         verbose_name = 'QSEC for QuARC'
         verbose_name_plural = 'QSEC for QuARC'
 
-class ProgramEvent(models.Model):
+class ConferenceEvent(models.Model):
     quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
     event = models.CharField(max_length=64, blank=False)
     location = models.CharField(max_length=64, blank=False)
@@ -165,7 +165,7 @@ class ProgramEvent(models.Model):
 
 class Session(models.Model):
     quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
-    event = models.ForeignKey(ProgramEvent, null=True, blank=True, on_delete=models.SET_NULL)
+    event = models.ForeignKey(ConferenceEvent, null=True, blank=True, on_delete=models.SET_NULL)
     name = models.CharField(max_length=32, blank=False)
 
     def validate_unique(self, exclude=None):

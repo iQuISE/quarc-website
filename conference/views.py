@@ -4,7 +4,7 @@ from django.db import models
 
 from datetime import datetime
 
-from conference.models import QuARCConference, QuARCQSECMembers, Attendee, ProgramEvent, Session, SessionAbstract, Abstract, ResearchArea, ResearchGoal
+from conference.models import QuARCConference, QuARCQSECMembers, Attendee, ConferenceEvent, Session, SessionAbstract, Abstract, ResearchArea, ResearchGoal
 from conference.forms import AttendeeForm, AbstractForm
 from conference.utils import get_conference
 
@@ -167,7 +167,7 @@ def program(request, year):
     except ValueError:
         return page_not_found(request, None)
 
-    program_data = ProgramEvent.objects.filter(quarc=conf)
+    program_data = ConferenceEvent.objects.filter(quarc=conf)
 
     return render(request, 'program.html',
                   {'conference': conf, 'show_countdown': True, 'program_data': program_data})

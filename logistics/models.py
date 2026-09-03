@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from conference.models import QuARCConference, Attendee
@@ -226,17 +227,20 @@ class Buses(models.Model):
         verbose_name_plural = 'Buses'
 
 def validate_bus_to(bus):
-    if bus.type != BusOption.Early or bus.type != BusOption.Late:
+    bus_obj = Buses.objects.filter(id=bus).first()
+    if bus_obj.type != Buses.BusOption.Early and bus_obj.type != Buses.BusOption.Late:
         raise ValidationError('%s is not a bus to QuARC' % bus)
 def validate_bus_from(bus):
-    if bus.type != BusOption.Return:
+    bus_obj = Buses.objects.filter(id=bus).first()
+    if bus_obj.type != Buses.BusOption.Return:
         raise ValidationError('%s is not a bus from QuARC' % bus)
 def validate_bus_capacity(bus):
-    if bus.type == BusOption.Early or bus.type == BusOption.Late:
-        if Bus.objects.filter(bus_to_assignment=bus).count() >= bus.capacity():
+    bus_obj = Buses.objects.filter(id=bus).first()
+    if bus_obj.type == Buses.BusOption.Early or bus_obj.type == Buses.BusOption.Late:
+        if Bus.objects.filter(bus_to_assignment=bus_obj).count() >= bus_obj.capacity:
             raise ValidationError('%s is full' % bus)
-    elif bus.type == BusOption.Return:
-        if Bus.objects.filter(bus_from_assignment=bus).count() >= bus.capacity():
+    elif bus_obj.type == Buses.BusOption.Return:
+        if Bus.objects.filter(bus_from_assignment=bus_obj).count() >= bus_obj.capacity:
             raise ValidationError('%s is full' % bus)
 
 class Bus(LogisticsModel):
