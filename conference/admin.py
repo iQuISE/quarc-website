@@ -135,11 +135,15 @@ class AttendeeAdmin(admin.ModelAdmin):
     fields = ['quarc', ('first_name', 'middle_name', 'last_name', 'suffix'),
               'email', ('status', 'affiliation'), 'authored_abstract', 'abstract_title']
     actions = [accept_attendees, reject_attendees]
-    inlines = (AttendeeAbstractInline, AttendeeAcceptanceInline,
-               AttendeeLogisticsMARCInline, AttendeeLogisticsDinnerInline,
-               AttendeeLogisticsHousingPreferencesInline, AttendeeLogisticsHousingAssignmentsInline,
+    inlines = (AttendeeAbstractInline,
+               AttendeeAcceptanceInline,
+               AttendeeLogisticsDinnerInline,
+               AttendeeLogisticsHousingPreferencesInline,
+               AttendeeLogisticsHousingAssignmentsInline,
+               AttendeeLogisticsSwagInline,
+               AttendeeLogisticsBusInline,
                AttendeeLogisticsActivitiesInline,
-               AttendeeLogisticsSwagInline, AttendeeLogisticsBusInline,)
+               AttendeeLogisticsMARCInline)
 
 # Attendee admin panel: slightly different filter rules and lots of inlines
 admin.site.register(Attendee, AttendeeAdmin)
