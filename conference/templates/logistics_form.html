@@ -52,7 +52,7 @@
         </div>
         <div class="row mb-3 overnight-section">
             <div class="col-md-6">
-				<label for="id_gender" class="form-label">Your Gender</label>
+				<label for="id_gender" class="form-label">Your Gender <span class="text-danger">*</span></label>
 				<select class="form-select" id="id_gender" name="gender">
 					<option value="">-- Select --</option>
 					<option value="Male" {% if housing_form.instance.gender == 'Male' %}selected{% endif %}>Male</option>
@@ -62,7 +62,7 @@
 				</select>
             </div>
             <div class="col-md-6">
-				<label for="id_preferred_roommate_gender" class="form-label">Preferred Roommate Gender</label>
+				<label for="id_preferred_roommate_gender" class="form-label">Preferred Roommate Gender <span class="text-danger">*</span></label>
 				<select class="form-select" id="id_preferred_roommate_gender" name="preferred_roommate_gender">
 					<option value="">-- Select --</option>
 					<option value="Male" {% if housing_form.instance.preferred_roommate_gender == 'Male' %}selected{% endif %}>Male</option>
@@ -100,8 +100,9 @@
                     </label>
                 </div>
 				<div class="dinner-section">
-					<label for="id_dinner_option" class="form-label">Dinner Option</label>
+					<label for="id_dinner_option" class="form-label">Dinner Option <span class="text-danger">*</span></label>
 					<select class="form-select" id="id_dinner_option" name="dinner_option">
+						<option value="">-- Select --</option>
 						{% for dinner_option in dinner_options %}
 						<option value="{{dinner_option.0}}" {% if dinner_form.instance.dinner_option.id == dinner_option.0 %}selected{% endif %}>{{dinner_option.1}}</option>
 						{% endfor %}
@@ -228,7 +229,7 @@
                     </label>
                 </div>
 				<div class="bus-to-section">
-					<label for="id_bus_to_type" class="form-label">Bus Time</label>
+					<label for="id_bus_to_type" class="form-label">Bus Time <span class="text-danger">*</span></label>
 					<select class="form-select" id="id_bus_to_type" name="bus_to_type">
 						<option value="">-- Select --</option>
 						<option value="0" {% if bus_form.instance.bus_to_type == 0 %}selected{% endif %}>Early</option>
@@ -256,29 +257,36 @@
 {% block extend_scripts %}
 <script>
  document.addEventListener('DOMContentLoaded', function() {
-	 function hideByCheckbox(checkbox_id, hide_class){
-		 const hideCheckbox = document.getElementById(checkbox_id)
-		 const hideDivs = document.getElementsByClassName(hide_class);
-		 function updateHide(){
-			 if(hideCheckbox.checked){
-				 for(const hideDiv of hideDivs){
-					 hideDiv.style.display = hideDiv.hidden_style;
+	 function showByCheckbox(checkbox_id, show_class, requiredIds){
+		 const showCheckbox = document.getElementById(checkbox_id)
+		 const showDivs = document.getElementsByClassName(show_class);
+		 function updateShow(){
+			 if(showCheckbox.checked){
+				 for(const showDiv of showDivs){
+					 showDiv.style.display = showDiv.hidden_style;
+				 }
+				 for(const id of requiredIds){
+					 document.getElementById(id).required = true;
 				 }
 			 }
 			 else{
-				 for(const hideDiv of hideDivs){
-					 hideDiv.hidden_style = hideDiv.style.display;
-					 hideDiv.style.display = 'none';
+				 for(const showDiv of showDivs){
+					 showDiv.hidden_style = showDiv.style.display;
+					 showDiv.style.display = 'none';
+				 }
+				 for(const id of requiredIds){
+					 document.getElementById(id).required = false;
 				 }
 			 }
 		 }
-		 hideCheckbox.addEventListener('change', updateHide);
-		 updateHide();
+		 showCheckbox.addEventListener('change', updateShow);
+		 updateShow();
 	 }
 
-	 hideByCheckbox('id_overnight_required', 'overnight-section');
-	 hideByCheckbox('id_dinner_required', 'dinner-section');
-	 hideByCheckbox('id_bus_to_required', 'bus-to-section');
+	 showByCheckbox('id_overnight_required', 'overnight-section',
+					['id_gender', 'id_preferred_roommate_gender']);
+	 showByCheckbox('id_dinner_required', 'dinner-section', ['id_dinner_option']);
+	 showByCheckbox('id_bus_to_required', 'bus-to-section', ['id_bus_to_type']);
 
      const roommateSelector = document.getElementById('id_preferred_roommate');
      const roommateOther = document.getElementById('roommate_other');
