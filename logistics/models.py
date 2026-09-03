@@ -14,8 +14,12 @@ class LogisticsModel(models.Model):
 
     def validate_unique(self, exclude=None):
         if self.latest:
+            attendee_pk = self.attendee.pk
+            logistics_pk = self.pk
+            print(attendee_pk)
+            print(logistics_pk)
             # Ensure there is only one latest entry.
-            conflict = self.__class__.objects.filter(attendee=self.attendee, latest=True).exclude(pk=self.pk)
+            conflict = self.__class__.objects.filter(attendee_id=attendee_pk, latest=True).exclude(pk=logistics_pk)
             if conflict.exists():
                 raise ValidationError('{} already has latest entry.'.format(self.attendee))
 
@@ -43,7 +47,7 @@ class LogisticsModel(models.Model):
 
 class Acceptance(LogisticsModel):
     accepted = models.BooleanField(null=False)
-    acceptance_note = models.CharField(max_length=256, blank=True)
+    acceptance_comment = models.CharField(max_length=256, blank=True)
     dropped = models.BooleanField(null=True)
 
     def __str__(self):
@@ -157,7 +161,7 @@ class Dinner(LogisticsModel):
         return '%s %s' % (self.attendee.first_name, self.attendee.last_name)
 
     def clean(self):
-        if self.option.quarc != self.attendee.quarc:
+        if self.dinner_option.quarc != self.attendee.quarc:
             raise ValidationError('Dinner option QuARC does not match attendee QuARC')
         super().clean()
 
@@ -249,9 +253,11 @@ class Bus(LogisticsModel):
         return '%s %s' % (self.attendee.first_name, self.attendee.last_name)
 
     def clean(self):
-        if self.bus_to_assignment.quarc != self.attendee.quarc:
+        if (self.bus_to_assignment is not None
+            and self.bus_to_assignment.quarc != self.attendee.quarc):
             raise ValidationError('Bus to QuARC does not match attendee QuARC')
-        if self.bus_from_assignment.quarc != self.attendee.quarc:
+        if (self.bus_from_assignment is not None
+            and self.bus_from_assignment.quarc != self.attendee.quarc):
             raise ValidationError('Bus from QuARC does not match attendee QuARC')
         super().clean()
 

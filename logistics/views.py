@@ -60,8 +60,9 @@ def logistics_page(request, year):
                            'attendee_email': attendee_email, 'email_error': email_error})
 
         # Get options to populate the form
-        needs_roommate = (attendee.status == Attendee.Status.Student
-                          or attendee.status == Attendee.Status.Postdoctoral_Researcher)
+        needs_roommate = (attendee.status == Attendee.Status.Graduate_Student
+                          or attendee.status == Attendee.Status.Postdoctoral_Researcher
+                          or attendee.status == Attendee.Status.Undergraduate_Student)
         roommate_options = [(a.attendee.pk, a.attendee.first_name + ' ' + a.attendee.last_name)
                             for a in (Acceptance.objects
                                       .filter(latest=True, accepted=True)
