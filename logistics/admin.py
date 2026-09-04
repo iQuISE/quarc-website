@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 from django.db import models
 from django.http import HttpResponse, HttpResponseRedirect
@@ -18,6 +19,15 @@ from functools import update_wrapper
 class QuARCAdmin(admin.ModelAdmin):
     list_filter = [QuARCFilter]
 
+class BusesForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args,**kwargs)
+        self.fields['leader'].queryset = Attendee.objects.filter(quarc=self.instance.quarc)
+
+    class Meta:
+        model = Buses
+        fields = '__all__'
+
 class BusesAdmin(QuARCAdmin):
     readonly_fields = ('leader_email', 'passengers')
     fields = ['quarc', ('type', 'number'), ('capacity', 'passengers'),
@@ -25,6 +35,8 @@ class BusesAdmin(QuARCAdmin):
 
     list_display = ['quarc', 'type', 'number', 'capacity', 'passengers',
                     'leader', 'leader_email', 'leader_phone_number']
+
+    form = BusesForm
 
     def leader_email(self, bus):
         if bus.leader:
