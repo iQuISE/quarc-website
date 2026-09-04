@@ -92,7 +92,7 @@ class LogisticsAdmin(admin.ModelAdmin):
     list_filter = [AttendeeQuARCFilter, LatestFilter, AcceptedFilter, DroppedFilter]
     readonly_fields = ['attendee', 'latest', 'edit_time']
     actions = [export_logistics_to_csv]
-    list_display = ('attendee', )
+    list_display = ('attendee', 'latest', 'edit_time', )
 
     def history_view(self, request, object_id, extra_context=None):
         "The 'history' admin view for this model."
@@ -258,7 +258,7 @@ class LogisticsHousingAssignmentsAdmin(LogisticsAdmin):
     readonly_fields = ['latest', 'edit_time']
     change_list_template = 'admin/housing_assignment_change_list.html'
 
-    list_display = ['attendee', 'roommate', 'nights']
+    list_display = LogisticsAdmin.list_display + ('roommate', 'nights')
 
     def get_urls(self):
         def wrap(view):

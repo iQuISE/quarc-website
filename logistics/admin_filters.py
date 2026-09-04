@@ -60,7 +60,8 @@ class LatestFilter(admin.SimpleListFilter):
     parameter_name = 'latest'
 
     def lookups(self, request, model_admin):
-        return [(None, 'Latest'), ('all', 'All'), ('stale', 'Stale')]
+        return [(None, 'Latest'), ('all', 'All'), ('stale', 'Outdated'),
+                ('has_revisions', 'Has revisions')]
 
     def choices(self, cl):
         for lookup, title in self.lookup_choices:
@@ -77,6 +78,9 @@ class LatestFilter(admin.SimpleListFilter):
             return queryset
         elif self.value() == 'stale':
             return queryset.filter(latest=False)
+        elif self.value() == 'has_revisions':
+            stale_set = queryset.filter(latest=False).values('attendee')
+            return queryset.filter(latest=True, attendee__in=stale_set)
         return queryset.filter(latest=True)
 
 class BusFilter(admin.SimpleListFilter):
