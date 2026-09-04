@@ -131,9 +131,16 @@ class LogisticsAdmin(admin.ModelAdmin):
         request.current_app = self.admin_site.name
         return TemplateResponse(request, 'admin/history_view.html', context)
 
+@admin.display(description='Winter Activities', boolean=True)
+def winter_activities(marc):
+    w = Activities.objects.filter(latest=True, attendee=marc.attendee)
+    if len(w) > 0:
+        return w.first().winter_activities
+    return None
+
 class MARCAdmin(LogisticsAdmin):
     list_filter = LogisticsAdmin.list_filter + ['attending_marc']
-    list_display = LogisticsAdmin.list_display + ('attending_marc',)
+    list_display = LogisticsAdmin.list_display + ('attending_marc', winter_activities)
 admin.site.register(MARC, MARCAdmin)
 
 @admin.display(description='Preferred Roommate')
@@ -178,9 +185,16 @@ class DinnerAdmin(LogisticsAdmin):
                                                   'kosher', 'halal', 'other_restriction')
 admin.site.register(Dinner, DinnerAdmin)
 
+@admin.display(description='Attending MARC', boolean=True)
+def attending_marc(activities):
+    M = MARC.objects.filter(latest=True, attendee=activities.attendee)
+    if len(M) > 0:
+        return M.first().attending_marc
+    return None
+
 class ActivitiesAdmin(LogisticsAdmin):
     list_filter = LogisticsAdmin.list_filter + ['winter_activities']
-    list_display = LogisticsAdmin.list_display + ('winter_activities',)
+    list_display = LogisticsAdmin.list_display + ('winter_activities', attending_marc)
 admin.site.register(Activities, ActivitiesAdmin)
 
 class SwagAdmin(LogisticsAdmin):
