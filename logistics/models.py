@@ -1,5 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.dispatch import receiver
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from conference.models import QuARCConference, Attendee
 
@@ -87,6 +89,8 @@ class HousingPreferences(LogisticsModel):
 class HousingAssignments(LogisticsModel):
     roommate = models.ForeignKey(Attendee, on_delete=models.SET_NULL, null=True, blank=True,
                                  related_name='assigned_roommate')
+    nights = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(7)],
+                                 default=1, null=False, blank=False)
 
     def __str__(self):
         if self.roommate is None:
@@ -135,6 +139,11 @@ class HousingAssignments(LogisticsModel):
         # Otherwise, add ourselves to our new roommate
         HousingAssignments.objects.create(attendee=self.roommate, roommate=self.attendee,
                                                    edit_time=datetime.now(), latest=True)
+
+    @receiver(models.signals.post_delete)
+    def delete_roommate(sender, instance, **kwargs):
+        HousingAssignments.objects.filter(latest=True, roommate=instance.attendee,
+                                          attendee=instance.roommate).delete()
 
 class DinnerOptions(models.Model):
     quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)

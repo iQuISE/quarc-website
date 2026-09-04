@@ -136,9 +136,39 @@ class MARCAdmin(LogisticsAdmin):
     list_display = LogisticsAdmin.list_display + ('attending_marc',)
 admin.site.register(MARC, MARCAdmin)
 
+@admin.display(description='Preferred Roommate')
+def housing_preferred_roommate(pref):
+    if pref.preferred_roommate is not None:
+         return pref.preferred_roommate
+    elif pref.preferred_roommate_name is not None:
+        return pref.preferred_roommate_name
+    return ''
+@admin.display(description='Housing', boolean=True)
+def housing_assignment(pref):
+    a = HousingAssignments.objects.filter(latest=True, attendee=pref.attendee)
+    if len(a) > 0:
+        return True
+    return False
+@admin.display(description='Assigned Roommate')
+def roommate_assignment(pref):
+    a = HousingAssignments.objects.filter(latest=True, attendee=pref.attendee)
+    if len(a) > 0:
+        return a.first().roommate
+    return ''
+@admin.display(description='Nights')
+def housing_nights(pref):
+    a = HousingAssignments.objects.filter(latest=True, attendee=pref.attendee)
+    if len(a) > 0:
+        return a.first().nights
+    return 0
+
 class HousingPreferencesAdmin(LogisticsAdmin):
     list_filter = LogisticsAdmin.list_filter + [HousingFilter]
-    list_display = LogisticsAdmin.list_display + ('overnight_required', 'needs_roommate')
+    list_display = LogisticsAdmin.list_display + ('overnight_required', 'needs_roommate',
+                                                  housing_preferred_roommate,
+                                                  'gender', 'preferred_roommate_gender',
+                                                  housing_assignment, roommate_assignment,
+                                                  housing_nights)
 admin.site.register(HousingPreferences, HousingPreferencesAdmin)
 
 class DinnerAdmin(LogisticsAdmin):
@@ -210,8 +240,11 @@ admin.site.register(Bus, BusAdmin)
 admin.site.register(Acceptance, LogisticsAdmin)
 
 class LogisticsHousingAssignmentsAdmin(LogisticsAdmin):
+    list_filter = LogisticsAdmin.list_filter + [UniqueHousingAssignmentFilter,]
     readonly_fields = ['latest', 'edit_time']
     change_list_template = 'admin/housing_assignment_change_list.html'
+
+    list_display = ['attendee', 'roommate', 'nights']
 
     def get_urls(self):
         def wrap(view):

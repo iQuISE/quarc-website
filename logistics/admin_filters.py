@@ -151,7 +151,7 @@ class HousingFilter(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         return [('assigned', 'Housing Assigned'),
                 ('required', 'Housing Unassigned'),
-                ('needs_roommate', 'Needs Roommate'),
+                ('needs_roommate', 'Alone, Needs Roommate'),
                 ('has_roommate', 'Has Roommate'),
                 ('not_overnight', 'Not Overnight')]
 
@@ -178,3 +178,30 @@ class HousingFilter(admin.SimpleListFilter):
             return queryset.filter(latest=True, overnight_required=False)
         else:
             return queryset
+
+class UniqueHousingAssignmentFilter(admin.SimpleListFilter):
+    '''
+    Filters paired housing assignments.
+    '''
+    title = 'Unique'
+    parameter_name = 'unique_housing'
+
+    def lookups(self, request, model_admin):
+        return [(None, 'Unique'), ('all', 'All')]
+
+    def choices(self, cl):
+        for lookup, title in self.lookup_choices:
+            yield {
+                'selected': self.value() == lookup,
+                'query_string': cl.get_query_string({
+                    self.parameter_name: lookup,
+                }, []),
+                'display': title,
+            }
+
+    def queryset(self, request, queryset):
+        if self.value() == 'all':
+            return queryset
+        else:
+            return queryset.filter(models.Q(attendee__email__gt=models.F('roommate__email'))
+                                   | models.Q(roommate=None))
