@@ -166,6 +166,39 @@ def abstract_content(attendee):
     else:
         return ''
 
+def logistics_complete(attendee, model):
+    return len(model.objects.filter(latest=True, attendee=attendee)) > 0
+@admin.display(description='Housing Logistics', boolean=True)
+def housing_logistics_complete(attendee):
+    return logistics_complete(attendee, HousingPreferences)
+@admin.display(description='Dinner Logistics', boolean=True)
+def dinner_logistics_complete(attendee):
+    return logistics_complete(attendee, Dinner)
+@admin.display(description='Activities Logistics', boolean=True)
+def activities_logistics_complete(attendee):
+    return logistics_complete(attendee, Activities)
+@admin.display(description='Swag Logistics', boolean=True)
+def swag_logistics_complete(attendee):
+    return logistics_complete(attendee, Swag)
+@admin.display(description='Bus Logistics', boolean=True)
+def bus_logistics_complete(attendee):
+    return logistics_complete(attendee, Bus)
+@admin.display(description='MARC Logistics', boolean=True)
+def marc_logistics_complete(attendee):
+    return logistics_complete(attendee, MARC)
+
+@admin.display(description='Housing Assigned', boolean=True)
+def housing_assigned(attendee):
+    return logistics_complete(attendee, HousingAssignments)
+@admin.display(description='Bus To Assigned', boolean=True)
+def bus_to_assigned(attendee):
+    return len(Bus.objects.filter(latest=True, bus_to_assignment__isnull=False,
+                                  attendee=attendee)) > 0
+@admin.display(description='Bus From Assigned', boolean=True)
+def bus_from_assigned(attendee):
+    return len(Bus.objects.filter(latest=True, bus_from_assignment__isnull=False,
+                                  attendee=attendee)) > 0
+
 class AttendeeAdmin(admin.ModelAdmin):
     list_filter = [QuARCFilter, AttendeeAcceptedFilter, AttendeeDroppedFilter, 'status',
                    AttendeeLogisticsFilter, AttendeeAbstractSessionFilter]
@@ -173,7 +206,15 @@ class AttendeeAdmin(admin.ModelAdmin):
                     abstract_research_group, abstract_title, attendee_abstract_session, abstract_content]
     list_display_links = ['first_name', 'last_name']
     fields = ['quarc', ('first_name', 'middle_name', 'last_name', 'suffix'),
-              'email', ('status', 'affiliation'), 'authored_abstract', 'abstract_title']
+              'email', ('status', 'affiliation'), 'authored_abstract', 'abstract_title',
+              (housing_logistics_complete, dinner_logistics_complete,
+               activities_logistics_complete, swag_logistics_complete,
+               bus_logistics_complete, marc_logistics_complete),
+              (housing_assigned, bus_to_assigned, bus_from_assigned)]
+    readonly_fields = (housing_logistics_complete, dinner_logistics_complete,
+                       activities_logistics_complete, swag_logistics_complete,
+                       bus_logistics_complete, marc_logistics_complete,
+                       housing_assigned, bus_to_assigned, bus_from_assigned)
     actions = [accept_attendees, reject_attendees, remove_attendee_session_assignment]
     inlines = (AttendeeAbstractInline,
                AttendeeAcceptanceInline,
