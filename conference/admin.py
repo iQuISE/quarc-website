@@ -36,6 +36,14 @@ def reject_attendees(modeladmin, request, queryset):
 @admin.action(description="Remove session assignment")
 def remove_attendee_session_assignment(modeladmin, request, queryset):
     SessionAbstract.objects.filter(abstract__pk__in=queryset.values('authored_abstract__pk')).delete()
+@admin.action(description="Delete attendees logistics")
+def delete_attendee_logistics(modeladmin, request, queryset):
+    MARC.objects.filter(attendee__pk__in=queryset.values('pk')).update(latest=False)
+    HousingPreferences.objects.filter(attendee__pk__in=queryset.values('pk')).update(latest=False)
+    Dinner.objects.filter(attendee__pk__in=queryset.values('pk')).update(latest=False)
+    Activities.objects.filter(attendee__pk__in=queryset.values('pk')).update(latest=False)
+    Swag.objects.filter(attendee__pk__in=queryset.values('pk')).update(latest=False)
+    Bus.objects.filter(attendee__pk__in=queryset.values('pk')).update(latest=False)
 
 class AttendeeAcceptedFilter(AcceptedFilter):
     filter_param = 'pk__in'
@@ -215,7 +223,8 @@ class AttendeeAdmin(admin.ModelAdmin):
                        activities_logistics_complete, swag_logistics_complete,
                        bus_logistics_complete, marc_logistics_complete,
                        housing_assigned, bus_to_assigned, bus_from_assigned)
-    actions = [accept_attendees, reject_attendees, remove_attendee_session_assignment]
+    actions = [accept_attendees, reject_attendees, remove_attendee_session_assignment,
+               delete_attendee_logistics]
     inlines = (AttendeeAbstractInline,
                AttendeeAcceptanceInline,
                AttendeeLogisticsDinnerInline,

@@ -49,11 +49,11 @@ def logistics_page(request, year):
                            'attendee_email': attendee_email, 'email_error': email_error})
 
         # Check if they have already filled out logistics
-        if (HousingPreferences.objects.filter(attendee=attendee).count() > 0
-            or Dinner.objects.filter(attendee=attendee).count() > 0
-            or Activities.objects.filter(attendee=attendee).count() > 0
-            or Swag.objects.filter(attendee=attendee).count() > 0
-            or Bus.objects.filter(attendee=attendee).count() > 0):
+        if (HousingPreferences.objects.filter(attendee=attendee, latest=True).count() > 0
+            or Dinner.objects.filter(attendee=attendee, latest=True).count() > 0
+            or Activities.objects.filter(attendee=attendee, latest=True).count() > 0
+            or Swag.objects.filter(attendee=attendee, latest=True).count() > 0
+            or Bus.objects.filter(attendee=attendee, latest=True).count() > 0):
             email_error = 'You have already filled out the logistics form.'
             return render(request, 'logistics_landing.html',
                           {'conference': conf, 'show_countdown': False,
