@@ -117,7 +117,8 @@ class Abstract(models.Model):
     graduation_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
-        return '%s' % self.title
+        return '%s %s, %s, %s' % (self.attendee.first_name, self.attendee.last_name,
+                                  self.title, self.research_area)
 
 class QSECMember(models.Model):
     company_name = models.CharField(max_length=64, blank=False)

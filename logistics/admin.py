@@ -22,7 +22,8 @@ class QuARCAdmin(admin.ModelAdmin):
 class BusesForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
-        self.fields['leader'].queryset = Attendee.objects.filter(quarc=self.instance.quarc)
+        if hasattr(self.instance, 'quarc'):
+            self.fields['leader'].queryset = Attendee.objects.filter(quarc=self.instance.quarc)
 
     class Meta:
         model = Buses
@@ -178,6 +179,21 @@ class BusAdmin(LogisticsAdmin):
         to_buses = Buses.objects.filter(models.Q(type=Buses.BusOption.Early)
                                         | models.Q(type=Buses.BusOption.Late))
         from_buses = Buses.objects.filter(type=Buses.BusOption.Return)
+
+        conf = None
+        if request.GET is None or 'quarc' not in request.GET:
+            try:
+                conf = QuARCConference.objects.latest('year')
+            except ObjectDoesNotExist:
+                pass
+        elif 'quarc' in request.GET:
+            try:
+                conf = get_conference(request.GET['quarc'])
+            except ValueError:
+                pass
+        if conf is not None:
+            to_buses = to_buses.filter(quarc=conf)
+            from_buses = from_buses.filter(quarc=conf)
 
         for to_bus in to_buses:
             name = 'add_to_{}'.format(to_bus.pk)

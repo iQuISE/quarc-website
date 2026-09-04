@@ -1,5 +1,7 @@
+from django import forms
 from django.conf import settings
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpResponse
 from wsgiref.util import FileWrapper
@@ -31,6 +33,9 @@ def accept_attendees(modeladmin, request, queryset):
 @admin.action(description="Reject attendees")
 def reject_attendees(modeladmin, request, queryset):
     add_attendee_acceptance(modeladmin, request, queryset, False)
+@admin.action(description="Remove session assignment")
+def remove_attendee_session_assignment(modeladmin, request, queryset):
+    SessionAbstract.objects.filter(abstract__pk__in=queryset.values('authored_abstract__pk')).delete()
 
 class AttendeeAcceptedFilter(AcceptedFilter):
     filter_param = 'pk__in'
@@ -74,6 +79,12 @@ class AttendeeLogisticsFilter(admin.SimpleListFilter):
         else:
             return queryset
 
+@admin.display(description='Abstract Session')
+def abstract_session(abstract):
+    ses_abs = SessionAbstract.objects.filter(abstract=abstract).first()
+    if ses_abs is not None:
+        return '{}, Poster #{}'.format(ses_abs.session.name, ses_abs.number)
+
 class AttendeeAbstractInline(admin.StackedInline):
     extra = 0
     max_num = 0 # Don't create an abstract
@@ -81,7 +92,7 @@ class AttendeeAbstractInline(admin.StackedInline):
     exclude = ('author_list', 'funding_sources', 'publications', 'figure', 'figure_caption',
                'seeking_internships', 'seeking_positions', 'elevator_pitch', 'oral_presentation',
                'cqe_feature', 'resume', 'graduation_date')
-    readonly_fields = ('title', 'abstract', 'research_group')
+    readonly_fields = ('title', 'abstract', 'research_group', abstract_session)
     model = Abstract
 
 class AttendeeLogisticsInline(admin.TabularInline):
@@ -127,12 +138,26 @@ class AttendeeLogisticsBusLeaderInline(admin.TabularInline):
     def has_add_permission(self, request, obj=None):
         return False
 
+@admin.display(description='Research Group')
+def abstract_research_group(attendee):
+    if attendee.authored_abstract:
+        return attendee.authored_abstract.research_group
+    else:
+        return ''
+
 @admin.display(description='Abstract Title')
 def abstract_title(attendee):
     if attendee.authored_abstract:
         return attendee.authored_abstract.title
     else:
         return attendee.abstract_title
+
+@admin.display(description='Abstract Session')
+def attendee_abstract_session(attendee):
+    if attendee.authored_abstract:
+        return abstract_session(attendee.authored_abstract)
+    else:
+        return ''
 
 @admin.display(description='Abstract Content')
 def abstract_content(attendee):
@@ -143,11 +168,13 @@ def abstract_content(attendee):
 
 class AttendeeAdmin(admin.ModelAdmin):
     list_filter = [QuARCFilter, AttendeeAcceptedFilter, AttendeeDroppedFilter, 'status',
-                   AttendeeLogisticsFilter]
-    list_display = ['first_name', 'last_name', 'email', abstract_title, abstract_content]
+                   AttendeeLogisticsFilter, AttendeeAbstractSessionFilter]
+    list_display = ['first_name', 'last_name', 'email', 'affiliation',
+                    abstract_research_group, abstract_title, attendee_abstract_session, abstract_content]
+    list_display_links = ['first_name', 'last_name']
     fields = ['quarc', ('first_name', 'middle_name', 'last_name', 'suffix'),
               'email', ('status', 'affiliation'), 'authored_abstract', 'abstract_title']
-    actions = [accept_attendees, reject_attendees]
+    actions = [accept_attendees, reject_attendees, remove_attendee_session_assignment]
     inlines = (AttendeeAbstractInline,
                AttendeeAcceptanceInline,
                AttendeeLogisticsDinnerInline,
@@ -159,7 +186,48 @@ class AttendeeAdmin(admin.ModelAdmin):
                AttendeeLogisticsActivitiesInline,
                AttendeeLogisticsMARCInline)
 
-# Attendee admin panel: slightly different filter rules and lots of inlines
+    def get_actions(self, request):
+        def assign_session_gen(session):
+            def assign_session(self, request, queryset):
+                idx = 0
+                for attendee in queryset:
+                    abstract = attendee.authored_abstract
+                    if abstract is None:
+                        continue
+                    while idx < 1000:
+                        idx += 1
+                        try:
+                            SessionAbstract.objects.create(session=session,
+                                                           abstract=abstract, number=idx)
+                            break
+                        except ValidationError:
+                            continue
+            return assign_session
+
+        actions = super().get_actions(request)
+
+        sessions = Session.objects.all()
+
+        conf = None
+        if request.GET is None or 'quarc' not in request.GET:
+            try:
+                conf = QuARCConference.objects.latest('year')
+            except ObjectDoesNotExist:
+                pass
+        elif 'quarc' in request.GET:
+            try:
+                conf = get_conference(request.GET['quarc'])
+            except ValueError:
+                pass
+        if conf is not None:
+            sessions = sessions.filter(quarc=conf)
+
+        for session in sessions:
+            name = 'add_to_{}'.format(session.pk)
+            actions[name] = (assign_session_gen(session), name, 'Add to {}'.format(session))
+
+        return actions
+
 admin.site.register(Attendee, AttendeeAdmin)
 
 @admin.action(description='Download abstracts')
@@ -181,7 +249,6 @@ def download_abstracts(modeladmin, request, queryset):
     archive = zipfile.ZipFile(response, 'w', zipfile.ZIP_DEFLATED)
     # Write a first row with header information
     columns = [field.verbose_name for field in attendee_fields + fields] + ['figure', 'resume']
-    print(columns)
     writer.writerow(columns)
     # Write data rows
     for obj in queryset:
@@ -219,21 +286,97 @@ def download_abstracts(modeladmin, request, queryset):
     archive.writestr('abstract_data/abstract_data.csv', csv_tempfile.read())
     archive.close()
     return response
+@admin.action(description="Remove session assignment")
+def remove_abstract_session_assignment(modeladmin, request, queryset):
+    SessionAbstract.objects.filter(abstract__pk__in=queryset.values('pk')).delete()
 
 class AbstractAdmin(admin.ModelAdmin):
-    list_filter = [AttendeeQuARCFilter, AcceptedFilter, DroppedFilter]
+    list_filter = [AttendeeQuARCFilter, AcceptedFilter, DroppedFilter, AbstractSessionFilter]
     readonly_fields = ('attendee',)
-    actions = [download_abstracts]
+    actions = [download_abstracts, remove_abstract_session_assignment]
     form = AbstractForm
-    list_display = ('attendee', 'title', 'research_area', 'research_group')
+    list_display = ('attendee', 'title', 'research_area', 'research_group', abstract_session, 'abstract')
 
-# Abstract admin panel: uses a nicer form to view abstracts
+    def get_actions(self, request):
+        def assign_session_gen(session):
+            def assign_session(self, request, queryset):
+                idx = 0
+                for abstract in queryset:
+                    while idx < 1000:
+                        idx += 1
+                        try:
+                            SessionAbstract.objects.create(session=session,
+                                                           abstract=abstract, number=idx)
+                            break
+                        except ValidationError:
+                            continue
+            return assign_session
+
+        actions = super().get_actions(request)
+
+        sessions = Session.objects.all()
+
+        conf = None
+        if request.GET is None or 'quarc' not in request.GET:
+            try:
+                conf = QuARCConference.objects.latest('year')
+            except ObjectDoesNotExist:
+                pass
+        elif 'quarc' in request.GET:
+            try:
+                conf = get_conference(request.GET['quarc'])
+            except ValueError:
+                pass
+        if conf is not None:
+            sessions = sessions.filter(quarc=conf)
+
+        for session in sessions:
+            name = 'add_to_{}'.format(session.pk)
+            actions[name] = (assign_session_gen(session), name, 'Add to {}'.format(session))
+
+        return actions
 admin.site.register(Abstract, AbstractAdmin)
 
-admin.site.register(Session, QuARCAdmin)
+class SessionAbstractInlineForm(forms.ModelForm):
+    '''Form to allow filtering abstracts by QuARC year.'''
+    abstract_field = forms.ModelChoiceField(queryset=Abstract.objects.none())
+
+    class Meta:
+        model = SessionAbstract
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not hasattr(self.instance, 'session'):
+            return
+        quarc = getattr(self.instance.session, 'quarc', None)
+        qs = Abstract.objects.order_by('attendee', 'title')
+        if quarc is not None:
+            qs = qs.filter(attendee__quarc=quarc)
+        self.fields['abstract_field'].queryset = qs
+        current_abstract = Abstract.objects.filter(pk=self.instance.abstract.pk).first()
+        self.fields['abstract_field'].initial = current_abstract
+
+class SessionAbstractInline(admin.TabularInline):
+    model = SessionAbstract
+    extra = 0
+    show_change_link = True
+
+    fields = ('abstract_field', 'number')
+
+    form = SessionAbstractInlineForm
+
+class SessionAdmin(QuARCAdmin):
+    list_display = ('name', 'quarc')
+
+    inlines = [SessionAbstractInline]
+
+admin.site.register(Session, SessionAdmin)
 
 class SessionAbstractAdmin(admin.ModelAdmin):
     list_filter = [SessionQuARCFilter]
+    list_display = ('abstract__attendee', 'abstract', 'session', 'number',
+                    'abstract__research_area', 'abstract__abstract')
 
-admin.site.register(SessionAbstract, SessionAbstractAdmin)
+# admin.site.register(SessionAbstract, SessionAbstractAdmin)
 

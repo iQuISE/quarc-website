@@ -111,7 +111,6 @@ class BusFilter(admin.SimpleListFilter):
             return (queryset.filter(latest=True)
                     .filter(~models.Q(**{self.parameter_name + '_assignment': None})))
         elif self.value() is not None:
-            print(self.value())
             return queryset.filter(latest=True,
                                    **{self.parameter_name + '_assignment': self.value()})
         return queryset
