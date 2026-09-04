@@ -12,7 +12,7 @@
         <span class="fs-6 text-dark mb-2 d-block">
             <a href="{% url 'abstract' conference.year abstract.pk %}" class="link-primary">{{ abstract.title }}</a>
         </span>
-        <div class="text-muted mb-1"><strong>Author:</strong> {{ abstract.author }}</div>
+        <div class="text-muted mb-1"><strong>Author{% if abstract.authors|length > 1%}s{% endif %}:</strong> {{ abstract.authors|join:', ' }}</div>
         <span class="badge-primary">{{ abstract.research_area }}</span>
 	</div>
 	{% endfor %}

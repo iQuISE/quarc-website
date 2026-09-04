@@ -5,71 +5,80 @@
         <h2>{{ abstract.title }}</h2>
     </div>
 
-    <div>
-        <div class="fs-6 text-dark mb-4">{{ abstract.author_list }}</div>
+    <div class="fs-6 text-dark mb-4">{{ abstract.author_list }}</div>
 
-        <h3 class="mb-4">Abstract</h3>
-        <div>{{ abstract.abstract|linebreaks }}</div>
+    <h3 class="mb-4">Abstract</h3>
+    <div>{{ abstract.abstract|linebreaks }}</div>
 
-        {% if abstract.figure %}
-        <div class="info-grid">
-			<div class="info-item">
-				<img src="{{ abstract.figure.url }}" alt="{{ abstract.figure_caption }}" class="img-fluid mb-2">
-			</div>
-            {% if abstract.figure_caption %}
-			<div class="info-item">
-				<p class="fst-italic text-muted mb-0">{{ abstract.figure_caption|linebreaks }}</p>
-			</div>
-            {% endif %}
-        </div>
-		{% endif %}
-        
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label mb-1">Funding Sources</div>
-                <div class="info-value">{{ abstract.funding_sources|default:"Not specified" }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label mb-1">Publications</div>
-                <div class="info-value">{{ abstract.publications|default:"Not specified" }}</div>
-            </div>
-        </div>
-
-        <div class="info-grid">
-            <div class="info-item"><div class="info-label mb-1">Research Area</div><div class="info-value">{{ abstract.research_area }}</div></div>
-            <div class="info-item"><div class="info-label mb-1">Research Group</div><div class="info-value">{{ abstract.research_group }}</div></div>
-            {% if abstract.graduation_date %}
-            <div class="info-item"><div class="info-label mb-1">Graduation Date</div><div class="info-value">{{ abstract.graduation_date|date:"F j, Y" }}</div></div>
-            {% endif %}
-        </div>
-
-        <h3 class="mt-4 mb-2">Presenter: {{ abstract.attendee.first_name }} {{ abstract.attendee.last_name }}</h3>
-        <div class="info-item">
-            <div class="info-label mb-1">Affiliation</div>
-            <div class="info-value">{{ abstract.attendee.affiliation }}, {{ abstract.attendee.get_status_display }}</div>
-        </div>
-
-        <div class="info-item">
-			<div class="info-label mb-1">Seeking</div>
-			<div class="info-value">
-				{% if abstract.seeking_internships %}
-                <span class="badge-yellow me-2"><i class="bi bi-briefcase"></i> Internships</span>
-				{% endif %}
-				{% if abstract.seeking_positions %}
-                <span class="badge-pink"><i class="bi bi-buildings"></i> Positions</span>
-				{% endif %}
-            </div>
-        </div>
-
-        {% if abstract.resume %}
-        <h3 class="mt-4 mb-2">Resume</h3>
-        <a href="{{ abstract.resume.url }}" class="btn btn-primary btn-rounded mb-4" download>
-            <i class="bi bi-file-earmark-pdf"></i> Download Resume
-        </a>
+    {% if abstract.figure %}
+    <div class="info-grid">
+		<div class="info-item">
+			<img src="{{ abstract.figure.url }}" alt="{{ abstract.figure_caption }}" class="img-fluid mb-2">
+		</div>
+        {% if abstract.figure_caption %}
+		<div class="info-item">
+			<p class="fst-italic text-muted mb-0">{{ abstract.figure_caption|linebreaks }}</p>
+		</div>
         {% endif %}
+    </div>
+	{% endif %}
 
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label mb-1">Funding Sources</div>
+            <div class="info-value">{{ abstract.funding_sources|default:"Not specified" }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label mb-1">Publications</div>
+            <div class="info-value">{{ abstract.publications|default:"Not specified" }}</div>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item"><div class="info-label mb-1">Research Area</div><div class="info-value">{{ abstract.research_area }}</div></div>
+        <div class="info-item"><div class="info-label mb-1">Research Group</div><div class="info-value">{{ abstract.research_group }}</div></div>
+        {% if abstract.graduation_date %}
+        <div class="info-item"><div class="info-label mb-1">Graduation Date</div><div class="info-value">{{ abstract.graduation_date|date:"F j, Y" }}</div></div>
+        {% endif %}
     </div>
 </div>
+
+<div class="content-section">
+    <h3 class="mt-4 mb-2">Presenter: {{ abstract.attendee.first_name }} {{ abstract.attendee.last_name }}</h3>
+    <div class="info-item">
+        <div class="info-label mb-1">Affiliation</div>
+        <div class="info-value">{{ abstract.attendee.affiliation }}, {{ abstract.attendee.get_status_display }}</div>
+    </div>
+
+    <div class="info-item">
+		<div class="info-label mb-1">Seeking</div>
+		<div class="info-value">
+			{% if abstract.seeking_internships %}
+            <span class="badge-yellow me-2"><i class="bi bi-briefcase"></i> Internships</span>
+			{% endif %}
+			{% if abstract.seeking_positions %}
+            <span class="badge-pink"><i class="bi bi-buildings"></i> Positions</span>
+			{% endif %}
+        </div>
+    </div>
+
+    {% if abstract.resume %}
+    <h3 class="mt-4 mb-2">Resume</h3>
+    <a href="{{ abstract.resume.url }}" class="btn btn-primary btn-rounded mb-4" download>
+        <i class="bi bi-file-earmark-pdf"></i> Download Resume
+    </a>
+    {% endif %}
+</div>
+
+{% for author in authors %}
+<div class="content-section">
+    <h3 class="mt-4 mb-2">Co-Presenter: {{ author.first_name }} {{ author.last_name }}</h3>
+    <div class="info-item">
+        <div class="info-label mb-1">Affiliation</div>
+        <div class="info-value">{{ author.affiliation }}, {{ author.get_status_display }}</div>
+    </div>
+</div>
+{% endfor %}
 <div class="content-section">
     <a href="{% url 'abstracts' conference.year %}" class="link-primary"><i class="bi bi-arrow-left"></i> Back to Sessions</a>
 </div>

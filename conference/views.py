@@ -183,11 +183,18 @@ def abstracts(request, year):
 
     for session in session_data:
         abstracts = SessionAbstract.objects.filter(session=session)
-        session_list.append({'name': session.name,
-                             'abstracts': [{'pk': a.abstract.pk, 'title': a.abstract.title,
-                                            'author': str(a.abstract.attendee),
-                                            'research_area': a.abstract.research_area}
-                                           for a in abstracts]})
+        abstract_dicts = []
+        for a in abstracts:
+            author_list = ['{} {}'.format(a.abstract.attendee.first_name,
+                                          a.abstract.attendee.last_name)]
+            authors = (Attendee.objects.filter(authored_abstract=a.abstract)
+                       .exclude(pk=a.abstract.attendee.pk))
+            author_list += ['{} {}'.format(author.first_name, author.last_name)
+                            for author in authors]
+            abstract_dicts.append({'pk': a.abstract.pk, 'title': a.abstract.title,
+                                   'authors': author_list,
+                                   'research_area': a.abstract.research_area})
+        session_list.append({'name': session.name, 'abstracts': abstract_dicts})
 
     return render(request, 'abstract_list.html',
                   {'conference': conf, 'show_countdown': True, 'sessions': session_list})
@@ -199,12 +206,16 @@ def abstract(request, year, abstract_id):
         return page_not_found(request, None)
 
     try:
-        abstract = Abstract.objects.filter(attendee__quarc=conf, pk=abstract_id).last
-    except Exception:
+        abstract = Abstract.objects.filter(attendee__quarc=conf, pk=abstract_id).last()
+
+        authors = Attendee.objects.filter(authored_abstract=abstract).exclude(pk=abstract.attendee.pk)
+    except Exception as e:
+        print(e)
         return page_not_found(request, None)
 
     return render(request, 'abstract.html',
-                  {'conference': conf, 'show_countdown': True, 'abstract': abstract})
+                  {'conference': conf, 'show_countdown': True,
+                   'abstract': abstract, 'authors': authors})
 
 def error_handler(request, exception=None, status_code=404):
     year = None
