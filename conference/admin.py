@@ -118,11 +118,14 @@ class AttendeeLogisticsBusLeaderInline(admin.TabularInline):
     fk_name = 'leader'
     extra = 0
     max_num = 1
-    show_change_link = True
+    show_change_link = False
     exclude = ('quarc', 'capacity')
     readonly_fields = ('type', 'number', 'leader_phone_number')
     verbose_name = 'Bus Leader'
     verbose_name_plural = 'Bus Leader'
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 @admin.display(description='Abstract Title')
 def abstract_title(attendee):
