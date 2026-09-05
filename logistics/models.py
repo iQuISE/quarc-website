@@ -142,8 +142,9 @@ class HousingAssignments(LogisticsModel):
 
     @receiver(models.signals.post_delete)
     def delete_roommate(sender, instance, **kwargs):
-        HousingAssignments.objects.filter(latest=True, roommate=instance.attendee,
-                                          attendee=instance.roommate).delete()
+        if sender == HousingAssignments:
+            HousingAssignments.objects.filter(latest=True, roommate=instance.attendee,
+                                              attendee=instance.roommate).delete()
 
 class DinnerOptions(models.Model):
     quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)

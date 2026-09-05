@@ -556,7 +556,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="/">
+            <a class="navbar-brand" href="{% url 'conference_home' conference.year %}">
                 <img src="/media/{{conference.logo}}" alt="QuARC {{conference.year}} Logo">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -565,7 +565,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/quarc{{conference.year}}">Home</a>
+                        <a class="nav-link active" aria-current="page" href="{% url 'conference_home' conference.year %}">Home</a>
                     </li>
 					{% if conference.program_active %}
                     <li class="nav-item dropdown">
@@ -573,32 +573,32 @@
                             Program
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="programDropdown">
-                            <li><a class="dropdown-item" href="/quarc{{conference.year}}/program/">Program</a></li>
-                            <li><a class="dropdown-item" href="/quarc{{conference.year}}/abstracts/">Abstract List</a></li>
+                            <li><a class="dropdown-item" href="{% url 'program' conference.year %}">Program</a></li>
+                            <li><a class="dropdown-item" href="{% url 'abstracts' conference.year %}">Abstract List</a></li>
                         </ul>
                     </li>
 					{% endif %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/quarc{{conference.year}}/committee">Committee</a>
+                        <a class="nav-link" href="{% url 'conference_committee' conference.year %}">Committee</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="attendDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Attend
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="attendDropdown">
-                            <li><a class="dropdown-item" href="/quarc{{conference.year}}/attend/">Important information</a></li>
+                            <li><a class="dropdown-item" href="{% url 'attend' conference.year %}">Important information</a></li>
 							{% if conference.abstract_submission_active %}
-                            <li><a class="dropdown-item" href="/quarc{{conference.year}}/abstract-submission/">Abstract Submission Open</a></li>
+                            <li><a class="dropdown-item" href="{% url 'registration_abstract_submission' conference.year %}">Abstract Submission Open</a></li>
 							{% else %}
-                            <li><a class="dropdown-item" href="/quarc{{conference.year}}/abstract-submission-closed/">Abstract Submission Closed</a></li>
+                            <li><a class="dropdown-item" href="{% url 'registration_closed' conference.year %}">Abstract Submission Closed</a></li>
 							{% endif %}
 							{% if conference.university_industry_registration_active %}
-                            <li><a class="dropdown-item" href="/quarc{{conference.year}}/university-and-industry-personnel/">University and Industry Personnel</a></li>
+                            <li><a class="dropdown-item" href="{% url 'registration_university_industry' conference.year %}">University and Industry Personnel</a></li>
 							{% endif %}
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/quarc{{conference.year}}/qsec-membership">QSEC Membership</a>
+                        <a class="nav-link" href="{% url 'qsec_membership' conference.year %}">QSEC Membership</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="previousDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -617,7 +617,7 @@
                             Partners
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="partnersDropdown">
-                            <li><a class="dropdown-item" href="http://cqe.mit.edu">CQE</a></li>
+                            <li><a class="dropdown-item" href="http://cqe.mit.edu/">CQE</a></li>
                             <li><a class="dropdown-item" href="https://www.iquise.mit.edu/">iQuISE</a></li>
                         </ul>
                     </li>
@@ -628,7 +628,7 @@
 
     <section class="main-content">
         <div class="content-wrapper">
-			{% if show_countdown %}
+			{% if show_countdown and conference.start_time %}
 			<div class="countdown-content">
 				<h1 class="countdown-title">QuARC {{conference.year}}</h1>
 				
