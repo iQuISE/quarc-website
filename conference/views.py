@@ -256,16 +256,25 @@ def error_handler(request, exception=None, status_code=404):
         except ValueError:
             pass
 
-    try:
-        if year:
+    if year:
+        try:
             conf = get_conference(year)
-        else:
+        except Exception:
+            conf = None
+
+    if conf is None:
+        try:
             # Default to most recent QuARC
             conf = QuARCConference.objects.order_by('-year').first()
-    except Exception:
-        # If there are truly no QuARCs, render what we can.
-        conf = None
+        except Exception:
+            # If there are truly no QuARCs, render what we can.
+            conf = {'year': 2020,
+                    'primary_color': '#ff0000',
+                    'secondary_color': '#ff0000',
+                    'dark_color': '#000000',
+                    'light_color': '#ffffff'}
 
+    print(conf)
     error_code_strs = {
         400: 'Bad Request',
         403: 'Forbidden',
