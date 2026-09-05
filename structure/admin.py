@@ -48,4 +48,6 @@ admin.site.register(DinnerOptionsProxy, QuARCAdmin)
 admin.site.register(SwagOptionsProxy, QuARCAdmin)
 
 # Email proxy
-admin.site.register(AttendeeEmailProxy, admin.ModelAdmin)
+class AttendeeEmailAdmin(admin.ModelAdmin):
+    readonly_fields = ('attendee', 'timestamp', 'subject', 'text_message', 'html_message')
+admin.site.register(AttendeeEmailProxy, AttendeeEmailAdmin)

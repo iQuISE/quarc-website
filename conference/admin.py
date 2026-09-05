@@ -4,11 +4,16 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpResponse
+from django.template import Template, RequestContext
+from django.template.response import TemplateResponse
+from django.urls import reverse
+from django.utils.html import format_html
 from wsgiref.util import FileWrapper
 
-from conference.models import Attendee, Abstract, Session, SessionAbstract
+from conference.models import Attendee, Abstract, Session, SessionAbstract, AttendeeEmail
 from conference.forms import AbstractForm
 from conference.admin_filters import *
+from conference.utils import email_attendee
 
 from logistics.models import Acceptance, MARC, HousingPreferences, HousingAssignments, Dinner, Activities, Swag, Buses, Bus
 from logistics.admin_filters import AttendeeQuARCFilter, AcceptedFilter, DroppedFilter
@@ -44,6 +49,30 @@ def delete_attendee_logistics(modeladmin, request, queryset):
     Activities.objects.filter(attendee__pk__in=queryset.values('pk')).update(latest=False)
     Swag.objects.filter(attendee__pk__in=queryset.values('pk')).update(latest=False)
     Bus.objects.filter(attendee__pk__in=queryset.values('pk')).update(latest=False)
+@admin.action(description='Email attendees')
+def email_attendees(modeladmin, request, queryset):
+    if 'post' in request.POST:
+        # Second call to this form, so we can now add the QSEC members
+        subject = request.POST['subject']
+
+        email_template = Template(request.POST['message'])
+
+        for attendee in queryset:
+            context = RequestContext(request, {'attendee': attendee})
+            message = email_template.render(context)
+
+            email_attendee(attendee, subject, message)
+
+        return None
+
+    context = {
+        **modeladmin.admin_site.each_context(request), 'title': f'Email attendees',
+        'action_checkbox_name': admin.helpers.ACTION_CHECKBOX_NAME,
+        'queryset': queryset, 'module_name': modeladmin.opts.verbose_name_plural,
+        'opts': modeladmin.opts
+    }
+
+    return TemplateResponse(request, 'admin/email_attendees.html', context)
 
 class AttendeeAcceptedFilter(AcceptedFilter):
     filter_param = 'pk__in'
@@ -145,6 +174,23 @@ class AttendeeLogisticsBusLeaderInline(admin.TabularInline):
 
     def has_add_permission(self, request, obj=None):
         return False
+class AttendeeEmailInline(admin.TabularInline):
+    def admin_link(self, instance):
+        '''Need special admin link because AttendeeEmail is in structure, not conference.'''
+        url = reverse('admin:structure_attendeeemailproxy_change', args=(instance.id,))
+        return format_html(f'<a href="{url}">View</a>')
+
+    model = AttendeeEmail
+    extra = 0
+    show_change_link = False
+    exclude = ('html_message', 'text_message')
+    readonly_fields = ('admin_link', 'timestamp', 'subject')
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.display(description='Research Group')
 def abstract_research_group(attendee):
@@ -224,7 +270,7 @@ class AttendeeAdmin(admin.ModelAdmin):
                        bus_logistics_complete, marc_logistics_complete,
                        housing_assigned, bus_to_assigned, bus_from_assigned)
     actions = [accept_attendees, reject_attendees, remove_attendee_session_assignment,
-               delete_attendee_logistics]
+               delete_attendee_logistics, email_attendees]
     inlines = (AttendeeAbstractInline,
                AttendeeAcceptanceInline,
                AttendeeLogisticsDinnerInline,
@@ -234,7 +280,9 @@ class AttendeeAdmin(admin.ModelAdmin):
                AttendeeLogisticsBusInline,
                AttendeeLogisticsBusLeaderInline,
                AttendeeLogisticsActivitiesInline,
-               AttendeeLogisticsMARCInline)
+               AttendeeLogisticsMARCInline,
+               AttendeeEmailInline)
+    change_form_template = 'admin/attendee_change_form.html'
 
     def get_actions(self, request):
         def assign_session_gen(session):
