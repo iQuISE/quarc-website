@@ -256,12 +256,15 @@ def error_handler(request, exception=None, status_code=404):
         except ValueError:
             pass
 
-    if year:
-        conf = get_conference(year)
-    else:
-        # Default to most recent QuARC
-        # This might fail, but in that case we should just show the user the error
-        conf = QuARCConference.objects.order_by('-year').first()
+    try:
+        if year:
+            conf = get_conference(year)
+        else:
+            # Default to most recent QuARC
+            conf = QuARCConference.objects.order_by('-year').first()
+    except Exception:
+        # If there are truly no QuARCs, render what we can.
+        conf = None
 
     error_code_strs = {
         400: 'Bad Request',
