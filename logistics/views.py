@@ -32,11 +32,11 @@ def logistics_page_get_attendee(conference, POST):
     return (attendee, None, attendee_email)
 
 def logistics_email(attendee, housing, dinner, activities, swag, bus):
-    text_msg = render_to_string('email_templates/logistics.txt',
+    text_msg = render_to_string('email_logistics.txt',
                                 context={'attendee': attendee, 'housing': housing,
                                          'dinner': dinner, 'activities': activities,
                                          'swag': swag, 'bus': bus})
-    html_msg = render_to_string('email_templates/logistics.html',
+    html_msg = render_to_string('email_logistics.html',
                                 context={'attendee': attendee, 'housing': housing,
                                          'dinner': dinner, 'activities': activities,
                                          'swag': swag, 'bus': bus})

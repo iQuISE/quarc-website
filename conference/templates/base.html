@@ -9,17 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-			{% if conference %}
             --primary-color: {{conference.primary_color}};
             --secondary-color: {{conference.secondary_color}};
             --dark-color: {{conference.dark_color}};
             --light-color: {{conference.light_color}};
-			{% else %}
-            --primary-color: #2ea3f2;
-            --secondary-color: #8300e9;
-            --dark-color: #1a1a1a;
-            --light-color: #ffffff;
-			{% endif %}
         }
 
         * {

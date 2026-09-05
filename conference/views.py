@@ -50,10 +50,10 @@ def attend(request, year):
                   {'conference': conf, 'show_countdown': True})
 
 def registration_abstract_submission_email(attendee, marc, abstract):
-    text_msg = render_to_string('email_templates/registration_abstract.txt',
+    text_msg = render_to_string('email_registration_abstract.txt',
                                 context={'attendee': attendee,
                                          'abstract': abstract, 'marc': marc})
-    html_msg = render_to_string('email_templates/registration_abstract.html',
+    html_msg = render_to_string('email_registration_abstract.html',
                                 context={'attendee': attendee,
                                          'abstract': abstract, 'marc': marc})
 
@@ -126,9 +126,9 @@ def registration_abstract_submission(request, year):
                    'abstract_form': abstract_form})
 
 def registration_university_industry_email(attendee, marc):
-    text_msg = render_to_string('email_templates/registration_university_industry.txt',
+    text_msg = render_to_string('email_registration_university_industry.txt',
                                 context={'attendee': attendee, 'marc': marc})
-    html_msg = render_to_string('email_templates/registration_university_industry.html',
+    html_msg = render_to_string('email_registration_university_industry.html',
                                 context={'attendee': attendee, 'marc': marc})
 
     try:
