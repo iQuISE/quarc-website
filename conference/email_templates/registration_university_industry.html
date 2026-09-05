@@ -1,0 +1,19 @@
+<p>Dear {{attendee.first_name}} {{attendee.last_name}},</p>
+<br />
+<p>Thank you for registering for QuARC {{conference.year}}. Our organizing committee will review your submission and inform you of acceptance after the registration deadline, {{ conference.registration_end|date:"F jS, Y" }}. For your records, here are your responses to the form:</p>
+<br />
+<p>About you</p>
+<ul>
+	<li><b>First name:</b> {{attendee.first_name}}</li>
+	<li><b>Last name:</b> {{attendee.last_name}}</li>
+	<li><b>Email:</b> {{attendee.email}}</li>
+	<li><b>Affiliation:</b> {{attendee.affiliation}}</li>
+	<li><b>Status:</b> {{attendee.status}}</li>
+</ul>
+{% if attendee.status == 1 or attendee.status == 6 %}
+<p>As a student, you are required to submit a poster to attend QuARC. The title of your abstract is: "{{attendee.abstract_title}}". If this abstract is not submited through the abstract submission page, you will not be accepted to attend QuARC.</p>
+{% endif %}
+<p>MARC Attendance</p>
+<ul>
+	<li><b>MARC Attendance:</b> {% if marc.attending_marc %}Yes{% else %}No{% endif %}</li>
+</ul>

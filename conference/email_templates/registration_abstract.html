@@ -1,0 +1,34 @@
+<p>Dear {{attendee.first_name}} {{attendee.last_name}},</p>
+<br />
+<p>Thank you for registering for QuARC {{conference.year}}. Our organizing committee will review your abstract and inform you of acceptance after the registration deadline, {{ conference.registration_end|date:"F jS, Y" }}. For your records, here are your responses to the form:</p>
+<br />
+<p>About you</p>
+<ul>
+	<li><b>First name:</b> {{attendee.first_name}}</li>
+	<li><b>Last name:</b> {{attendee.last_name}}</li>
+	<li><b>Email:</b> {{attendee.email}}</li>
+	<li><b>Affiliation:</b> {{attendee.affiliation}}</li>
+	<li><b>Status:</b> {{attendee.status}}</li>
+</ul>
+<p>Your abstract (images omitted)</p>
+<ul>
+	<li><b>Abstract title:</b> {{abstract.title}}</p>
+	<li><b>Author list:</b> {{abstract.author_list}}</p>
+	<li><b>Funding sources:</b> {{abstract.funding_sources}}</p>
+	<li><b>Publications:</b> {{abstract.publications}}</p>
+	<li><b>Figure caption:</b> {{abstract.figure_caption}}</p>
+	<li><b>Abstract:</b> {{abstract.abstract}}</p>
+	<li><b>Research group:</b> {{abstract.research_group}}</p>
+	<li><b>Research area:</b> {{abstract.research_area}}</p>
+	<li><b>Research goal:</b> {{abstract.research_goal}}</p>
+	<li><b>Seeking internships:</b> {% if abstract.seeking_internships %}Yes{% else %}No{% endif %}</p>
+	<li><b>Seeking positions:</b> {% if abstract.seeking_positions %}Yes{% else %}No{% endif %}</p>
+	<li><b>2 minute elevator pitch:</b> {% if abstract.elevator_pitch %}Yes{% else %}No{% endif %}</p>
+	<li><b>10 minute talk:</b> {% if abstract.oral_presentation %}Yes{% else %}No{% endif %}</p>
+	<li><b>Feature in CQE report:</b> {% if abstract.cqe_feature %}Yes{% else %}No{% endif %}</p>
+	<li><b>Graduation date:</b> {{abstract.graduation_date}}</p>
+</ul>
+<p>MARC Attendance</p>
+<ul>
+	<li><b>MARC Attendance:</b> {% if marc.attending_marc %}Yes{% else %}No{% endif %}</li>
+</ul>

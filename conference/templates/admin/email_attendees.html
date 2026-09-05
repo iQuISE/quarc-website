@@ -1,0 +1,30 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ module_name }}</a>
+&rsaquo; {% translate 'Email' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<p>Please enter the email to send to the selected attendees.</p>
+<form method="post">{% csrf_token %}
+    <div>
+		<label for="id_subject" class="form-label">Subject</label>
+		<input type="text" class="form-control" id="id_subject" name="subject" value="" required>
+		<label for="id_message" class="form-label">Message</label>
+		<textarea class="form-control" id="id_message" name="message" rows="8" required>{% verbatim %}Dear {{attendee.first_name}} {{attendee.last_name}},{% endverbatim %}</textarea>
+		{% for obj in queryset %}
+		<input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk }}">
+		{% endfor %}
+		<input type="hidden" name="action" value="email_attendees">
+		<input type="hidden" name="post" value="yes">
+		<input type="submit" value="Submit">
+    </div>
+</form>
+<p>Django text substitutions are possible in the body, but not the subject. The attendee data will be stored in an object called <code>attendee</code>.</p>
+{% endblock %}

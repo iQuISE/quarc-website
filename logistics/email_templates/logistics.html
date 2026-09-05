@@ -1,0 +1,45 @@
+<p>Dear {{attendee.first_name}} {{attendee.last_name}},</p>
+<br />
+<p>Thank you for completing the logistics form for QuARC {{conference.year}}. Our organizing committee is grateful for your prompt reply. We look forward to seeing you at QuARC. For your records, here are your responses to the form:</p>
+<br />
+<p>About you</p>
+<ul>
+	<li><b>First name:</b> {{attendee.first_name}}</li>
+	<li><b>Last name:</b> {{attendee.last_name}}</li>
+	<li><b>Email:</b> {{attendee.email}}</li>
+</ul>
+<p>Housing preferences</p>
+<ul>
+	<li><b>Overnight required:</b> {{housing.overnight_required}}</li>
+{% if housing.overnight_required and housing.needs_roommate %}
+	<li><b>Preferred roommate:</b> {{housing.preferred_roommate}}</li>
+	<li><b>Preferred roommate name:</b> {{housing.preferred_roommate_name}}</li>
+	<li><b>Your gender:</b> {{housing.gender}}</li>
+	<li><b>Your preferred roommate gender:</b> {{housing.preferred_roommate_gender}}</li>
+{% endif %}
+</ul>
+<p>Dinner preferences</p>
+<ul>
+	<li><b>Dinner required:</b> {{dinner.dinner_required}}</li>
+{% if dinner.dinner_required %}
+	<li><b>Dinner choice:</b> {{dinner.dinner_option}}</li>
+{% if dinner.vegetarian %}<li>Vegetarian</li>{% endif %}
+{% if dinner.vegan %}<li>Vegan</li>{% endif %}
+{% if dinner.gluten_free %}<li>Gluten Free</li>{% endif %}
+{% if dinner.kosher %}<li>Kosher</li>{% endif %}
+{% if dinner.Halal %}<li>Halal</li>{% endif %}
+{% if dinner.other_restriction %}<li>{{dinner.other_restriction}}</li>{% endif %}
+{% endif %}
+</ul>
+{% if activities.winter_activities %}<p>You plan to participate in winter activities.</p>
+{% else %}<p>You don't plan to participate in winter activities.</p>{% endif %}
+<p>You selected the "{{ swag.swag_option }}" swag.</p>
+<p>Transportation requirements</p>
+<ul>
+{% if bus.bus_to_required %}
+	{% if bus.bus_to_type == 0 %}<li>Early bus to QuARC</li>{% endif %}
+	{% if bus.bus_to_type == 1 %}<li>Late bus to QuARC</li>{% endif %}
+{% endif %}
+{% if bus.bus_from_required %}<li>Bus from QuARC</li>{% endif %}
+</ul>
+<p>If you need to change any of these, please contact the organizing committee.</p>

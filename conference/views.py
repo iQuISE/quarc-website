@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.template.loader import render_to_string
 
 from datetime import datetime
 
 from conference.models import QuARCConference, QuARCQSECMembers, Attendee, ConferenceEvent, Session, SessionAbstract, Abstract, ResearchArea, ResearchGoal
 from conference.forms import AttendeeForm, AbstractForm
-from conference.utils import get_conference
+from conference.utils import get_conference, email_attendee
 
 from logistics.models import Acceptance
 from logistics.forms import MARCForm
@@ -48,6 +49,19 @@ def attend(request, year):
     return render(request, 'attend.html',
                   {'conference': conf, 'show_countdown': True})
 
+def registration_abstract_submission_email(attendee, marc, abstract):
+    text_msg = render_to_string('email_templates/registration_abstract.txt',
+                                context={'attendee': attendee,
+                                         'abstract': abstract, 'marc': marc})
+    html_msg = render_to_string('email_templates/registration_abstract.html',
+                                context={'attendee': attendee,
+                                         'abstract': abstract, 'marc': marc})
+
+    try:
+        email_attendee(attendee, 'Registration Successful', text_msg, html_msg)
+    except Exception:
+        pass # Fail silently
+
 def registration_abstract_submission(request, year):
     try:
         conf = get_conference(year)
@@ -86,12 +100,14 @@ def registration_abstract_submission(request, year):
                     abstract_form.instance.research_area = request.POST['research_area_other']
 
                 attendee = attendee_form.save()
-                marc_form.save()
+                marc = marc_form.save()
                 abstract = abstract_form.save()
 
                 # Link authored abstract to attendee
                 attendee.authored_abstract = abstract
                 attendee.save()
+
+                registration_abstract_submission_email(attendee, marc, abstract)
 
                 return render(request, 'registration_success.html',
                               {'conference': conf, 'show_countdown': False})
@@ -108,6 +124,17 @@ def registration_abstract_submission(request, year):
                    'research_goals': ResearchGoal.objects.filter(quarc=conf),
                    'marc_form': marc_form,
                    'abstract_form': abstract_form})
+
+def registration_university_industry_email(attendee, marc):
+    text_msg = render_to_string('email_templates/registration_university_industry.txt',
+                                context={'attendee': attendee, 'marc': marc})
+    html_msg = render_to_string('email_templates/registration_university_industry.html',
+                                context={'attendee': attendee, 'marc': marc})
+
+    try:
+        email_attendee(attendee, 'Registration Successful', text_msg, html_msg)
+    except Exception:
+        pass # Fail silently
 
 def registration_university_industry(request, year):
     try:
@@ -132,8 +159,11 @@ def registration_university_industry(request, year):
             marc_form.instance.latest = True
 
             if marc_form.is_valid():
-                attendee_form.save()
-                marc_form.save()
+                attendee = attendee_form.save()
+                marc = marc_form.save()
+
+                registration_university_industry_email(attendee, marc)
+
                 return render(request, 'registration_success.html',
                               {'conference': conf, 'show_countdown': False})
     else:

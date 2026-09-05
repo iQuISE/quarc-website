@@ -31,6 +31,21 @@ def logistics_page_get_attendee(conference, POST):
 
     return (attendee, None, attendee_email)
 
+def logistics_email(attendee, housing, dinner, activities, swag, bus):
+    text_msg = render_to_string('email_templates/logistics.txt',
+                                context={'attendee': attendee, 'housing': housing,
+                                         'dinner': dinner, 'activities': activities,
+                                         'swag': swag, 'bus': bus})
+    html_msg = render_to_string('email_templates/logistics.html',
+                                context={'attendee': attendee, 'housing': housing,
+                                         'dinner': dinner, 'activities': activities,
+                                         'swag': swag, 'bus': bus})
+
+    try:
+        email_attendee(attendee, 'Logistics Received', text_msg, html_msg)
+    except Exception:
+        pass # Fail silently
+
 def logistics_page(request, year):
     try:
         conf = get_conference(year)
@@ -97,6 +112,10 @@ def logistics_page(request, year):
             if all([form.is_valid() for form in all_forms]):
                 for form in all_forms:
                     form.save()
+
+                logistics_email(attendee, housing_form.instance,
+                                dinner_form.instance, activities_form.instance,
+                                swag_form.instance, bus_form.instance)
 
                 return render(request, 'logistics_success.html',
                               {'conference': conf, 'show_countdown': True})

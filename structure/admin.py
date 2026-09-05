@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.template.response import TemplateResponse
 
-from structure.models import QuARCConferenceProxy, QSECMemberProxy, QuARCQSECMembersProxy, ConferenceEventProxy, DinnerOptionsProxy, SwagOptionsProxy, ResearchAreaProxy, ResearchGoalProxy
+from structure.models import QuARCConferenceProxy, QSECMemberProxy, QuARCQSECMembersProxy, ConferenceEventProxy, DinnerOptionsProxy, SwagOptionsProxy, ResearchAreaProxy, ResearchGoalProxy, AttendeeEmailProxy
 
 from conference.admin import QuARCAdmin
 
@@ -46,3 +46,6 @@ admin.site.register(QSECMemberProxy, QuARCQSECMembersAdmin)
 # Logistics Proxies
 admin.site.register(DinnerOptionsProxy, QuARCAdmin)
 admin.site.register(SwagOptionsProxy, QuARCAdmin)
+
+# Email proxy
+admin.site.register(AttendeeEmailProxy, admin.ModelAdmin)

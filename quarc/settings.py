@@ -108,6 +108,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Email
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = "/tmp/quarc-messages"  # change this to a proper location
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

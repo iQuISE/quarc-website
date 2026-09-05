@@ -1,0 +1,3 @@
+Dear {{attendee.first_name}} {{attendee.last_name}},
+
+<p>Thank you for registering for QuARC {{conference.year}}. Our organizing committee will review your submission and inform you of acceptance after the registration deadline, {{ conference.registration_end|date:"F jS, Y" }}.

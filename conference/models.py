@@ -120,6 +120,21 @@ class Abstract(models.Model):
         return '%s %s, %s, %s' % (self.attendee.first_name, self.attendee.last_name,
                                   self.title, self.research_area)
 
+class AttendeeEmail(models.Model):
+    attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField()
+    subject = models.CharField(max_length=512, blank=False)
+    text_message = models.TextField(blank=False)
+    html_message = models.TextField(blank=True)
+
+    def __str__(self):
+        return '%s to %s %s' % (self.subject, self.attendee.first_name,
+                                self.attendee.last_name)
+
+    class Meta:
+        verbose_name = 'Attendee Email'
+        verbose_name_plural = 'Attendee Emails'
+
 class QSECMember(models.Model):
     company_name = models.CharField(max_length=64, blank=False)
     founder = models.BooleanField(null=False)

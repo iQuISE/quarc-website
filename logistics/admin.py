@@ -2,6 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.db import models
 from django.http import HttpResponse, HttpResponseRedirect
+from django.template import Template, RequestContext
 from django.template.response import TemplateResponse
 from django.urls import reverse, path
 
@@ -11,6 +12,7 @@ from logistics.housing_assignment import assign_housing
 
 from conference.models import QuARCConference, Attendee
 from conference.admin_filters import QuARCFilter
+from conference.utils import email_attendee
 
 import csv
 from datetime import datetime
@@ -88,10 +90,36 @@ def export_logistics_to_csv(modeladmin, request, queryset):
 
     return response
 
+@admin.action(description='Email attendees')
+def email_attendees(modeladmin, request, queryset):
+    if 'post' in request.POST:
+        # Second call to this form, so we can now add the QSEC members
+        subject = request.POST['subject']
+
+        email_template = Template(request.POST['message'])
+
+        for item in queryset:
+            attendee = item.attendee
+            context = RequestContext(request, {'attendee': attendee})
+            message = email_template.render(context)
+
+            email_attendee(attendee, subject, message)
+
+        return None
+
+    context = {
+        **modeladmin.admin_site.each_context(request), 'title': f'Email attendees',
+        'action_checkbox_name': admin.helpers.ACTION_CHECKBOX_NAME,
+        'queryset': queryset, 'module_name': modeladmin.opts.verbose_name_plural,
+        'opts': modeladmin.opts
+    }
+
+    return TemplateResponse(request, 'admin/email_attendees.html', context)
+
 class LogisticsAdmin(admin.ModelAdmin):
     list_filter = [AttendeeQuARCFilter, LatestFilter, AcceptedFilter, DroppedFilter]
     readonly_fields = ['attendee', 'latest', 'edit_time']
-    actions = [export_logistics_to_csv]
+    actions = [export_logistics_to_csv, email_attendees]
     list_display = ('attendee', 'latest', 'edit_time', )
 
     def history_view(self, request, object_id, extra_context=None):

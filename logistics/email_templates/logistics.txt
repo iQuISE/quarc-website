@@ -1,0 +1,3 @@
+Dear {{attendee.first_name}} {{attendee.last_name}},
+
+Thank you for completing the logistics form for QuARC {{conference.year}}. Our organizing committee is grateful for your prompt reply. We look forward to seeing you at QuARC.
