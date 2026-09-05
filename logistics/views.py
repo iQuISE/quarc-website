@@ -1,8 +1,11 @@
 from django.shortcuts import render
 from django.db import models
+from django.template.loader import render_to_string
 
 from conference.utils import get_conference
 from conference.models import Attendee
+from conference.views import page_not_found
+from conference.utils import email_attendee
 
 from logistics.models import Acceptance, HousingPreferences, DinnerOptions, Dinner, Activities, SwagOptions, Swag, Bus
 from logistics.forms import HousingPreferencesForm, DinnerForm, ActivitiesForm, SwagForm, BusForm
@@ -33,11 +36,13 @@ def logistics_page_get_attendee(conference, POST):
 
 def logistics_email(attendee, housing, dinner, activities, swag, bus):
     text_msg = render_to_string('email_logistics.txt',
-                                context={'attendee': attendee, 'housing': housing,
+                                context={'conference': attendee.quarc,
+                                         'attendee': attendee, 'housing': housing,
                                          'dinner': dinner, 'activities': activities,
                                          'swag': swag, 'bus': bus})
     html_msg = render_to_string('email_logistics.html',
-                                context={'attendee': attendee, 'housing': housing,
+                                context={'conference': attendee.quarc,
+                                         'attendee': attendee, 'housing': housing,
                                          'dinner': dinner, 'activities': activities,
                                          'swag': swag, 'bus': bus})
 

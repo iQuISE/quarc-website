@@ -51,10 +51,12 @@ def attend(request, year):
 
 def registration_abstract_submission_email(attendee, marc, abstract):
     text_msg = render_to_string('email_registration_abstract.txt',
-                                context={'attendee': attendee,
+                                context={'conference': attendee.quarc,
+                                         'attendee': attendee,
                                          'abstract': abstract, 'marc': marc})
     html_msg = render_to_string('email_registration_abstract.html',
-                                context={'attendee': attendee,
+                                context={'conference': attendee.quarc,
+                                         'attendee': attendee,
                                          'abstract': abstract, 'marc': marc})
 
     try:
