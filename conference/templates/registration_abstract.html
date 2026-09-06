@@ -98,8 +98,9 @@
         </div>
 		<div class="row mb-3">
             <div class="col-md-12">
-				<label for="id_publications" class="form-label">Publications <span class="text-danger">*</span></label>
-				<input type="text" class="form-control" id="id_publications" name="publications" value="{{abstract_form.instance.publications}}" required>
+				<label for="id_publications" class="form-label">Publications</label>
+				<input type="text" class="form-control" id="id_publications" name="publications" value="{{abstract_form.instance.publications}}">
+				<p>If the work described in this abstract has been published, you may provide a citation here</p>
             </div>
         </div>
 		<div class="row mb-3">
@@ -109,8 +110,8 @@
 				<p><i>Maximum upload size 10Mb</i></p>
             </div>
             <div class="col-md-6">
-				<label for="id_figure_caption" class="form-label">Figure Caption <span class="text-danger">*</span></label>
-				<textarea class="form-control" id="id_figure_caption" name="figure_caption" rows="3" required>{{abstract_form.instance.figure_caption}}</textarea>
+				<label for="id_figure_caption" class="form-label">Figure Caption</label>
+				<textarea class="form-control" id="id_figure_caption" name="figure_caption" rows="3">{{abstract_form.instance.figure_caption}}</textarea>
             </div>
         </div>
 		<div class="row mb-3">
