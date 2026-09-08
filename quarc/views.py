@@ -10,3 +10,6 @@ def index(request):
     most_recent_quarc = QuARCConference.objects.order_by('year').last()
     if most_recent_quarc is not None:
         return redirect(reverse('conference_home', args=[most_recent_quarc.year]))
+
+def perm_redirect(request, url):
+    return redirect(url, permanent=False, preserve_request=False)
