@@ -11,22 +11,36 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os # Get database from environment
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&z2-yt=gn&-@gxtjcsp!cgn7qc(wluj)88n77mqetz3zy#b*1j'
+try:
+    SECRET_KEY
+except NameError:
+    SECRET_FILE = os.path.join(BASE_DIR, 'quarc', 'secret.txt')
+    try:
+        SECRET_KEY = open(SECRET_FILE).read().strip()
+    except IOError:
+        try:
+            import random
+            SECRET_KEY = ''.join([random.SystemRandom().choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%\
+^&*(-_=+)') for i in range(50)])
+            secret = open(SECRET_FILE, 'w')
+            secret.write(SECRET_KEY)
+            secret.close()
+        except IOError:
+            Exception('Please create a %s file with random characters to generate your secret key!' % SECRET_FILE)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['192.168.122.202', '192.168.1.4', 'carterturn.com']
-
+ALLOWED_HOSTS = ['localhost', 'quarc.mit.edu', 'www.quarc.mit.edu', '192.168.122.202', 'carterturn.com']
 
 # Application definition
 
@@ -82,11 +96,11 @@ WSGI_APPLICATION = 'quarc.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'quarc_db',
-        'USER': 'quarc',
-        'PASSWORD': 'Will0l!v3r',
-        'HOST': 'localhost',
-        'PORT': 3306,
+        'NAME': os.environ['DB_NAME'],
+        'USER': os.environ['DB_USER'],
+        'PASSWORD': os.environ['DB_PASSWORD'],
+        'HOST': os.environ['DB_HOST'],
+        'PORT': os.environ['DB_PORT'],
     }
 }
 
@@ -110,9 +124,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Email
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-EMAIL_FILE_PATH = "/tmp/quarc-messages"  # change this to a proper location
-
+if DEBUG:
+    # For debugging, log to files. Otherwise, defaults seem to work.
+    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+    EMAIL_FILE_PATH = "/tmp/quarc-messages"  # change this to a proper location
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -129,9 +144,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_ROOT = '/home/nginx/quarc/static/'
+STATIC_ROOT = os.path.join(BASE_DIR.parent, 'static')
 STATIC_URL = 'static/'
-MEDIA_ROOT = '/home/nginx/quarc/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR.parent, 'media')
 MEDIA_URL = 'media/'
 
 # File uploads
