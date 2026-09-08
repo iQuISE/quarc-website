@@ -129,9 +129,11 @@ def registration_abstract_submission(request, year):
 
 def registration_university_industry_email(attendee, marc):
     text_msg = render_to_string('email_registration_university_industry.txt',
-                                context={'attendee': attendee, 'marc': marc})
+                                context={'conference': attendee.quarc,
+                                         'attendee': attendee, 'marc': marc})
     html_msg = render_to_string('email_registration_university_industry.html',
-                                context={'attendee': attendee, 'marc': marc})
+                                context={'conference': attendee.quarc,
+                                         'attendee': attendee, 'marc': marc})
 
     try:
         email_attendee(attendee, 'Registration Successful', text_msg, html_msg)
