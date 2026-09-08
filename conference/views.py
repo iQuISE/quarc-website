@@ -242,7 +242,6 @@ def abstract(request, year, abstract_id):
 
         authors = Attendee.objects.filter(authored_abstract=abstract).exclude(pk=abstract.attendee.pk)
     except Exception as e:
-        print(e)
         return page_not_found(request, None)
 
     return render(request, 'abstract.html',
@@ -258,11 +257,12 @@ def error_handler(request, exception=None, status_code=404):
         except ValueError:
             pass
 
+    conf = None
     if year:
         try:
             conf = get_conference(year)
         except Exception:
-            conf = None
+            pass
 
     if conf is None:
         try:
@@ -276,7 +276,6 @@ def error_handler(request, exception=None, status_code=404):
                     'dark_color': '#000000',
                     'light_color': '#ffffff'}
 
-    print(conf)
     error_code_strs = {
         400: 'Bad Request',
         403: 'Forbidden',
