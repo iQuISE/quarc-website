@@ -123,6 +123,36 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOG_DIR = os.path.join(BASE_DIR.parent, 'logs')
+if not os.path.isdir(LOG_DIR):
+    os.mkdir(LOG_DIR)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, 'INFO.log'),
+            'maxBytes': 10*1024*1024,
+            'backupCount': 5,
+            'formatter': 'custom',
+        },
+    },
+    'formatters':{
+        'custom':{
+            'format': '%(asctime)s %(levelname)-8s %(message)s',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
 # Email
 if DEBUG:
     # For debugging, log to files. Otherwise, defaults seem to work.
@@ -144,9 +174,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR.parent, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = 'static/'
-MEDIA_ROOT = os.path.join(BASE_DIR.parent, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = 'media/'
 
 # File uploads
