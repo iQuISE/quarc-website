@@ -269,12 +269,15 @@ def error_handler(request, exception=None, status_code=404):
             # Default to most recent QuARC
             conf = QuARCConference.objects.order_by('-year').first()
         except Exception:
-            # If there are truly no QuARCs, render what we can.
-            conf = {'year': 2020,
-                    'primary_color': '#ff0000',
-                    'secondary_color': '#ff0000',
-                    'dark_color': '#000000',
-                    'light_color': '#ffffff'}
+            pass
+
+    if conf is None:
+        # If there are truly no QuARCs, render what we can.
+        conf = {'year': 2027,
+                'primary_color': '#ff0000',
+                'secondary_color': '#ff0000',
+                'dark_color': '#000000',
+                'light_color': '#ffffff'}
 
     error_code_strs = {
         400: 'Bad Request',
@@ -288,7 +291,8 @@ def error_handler(request, exception=None, status_code=404):
 
     return render(request, 'error.html',
                   {'conference': conf, 'show_countdown': False,
-                   'error_code': status_code, 'error_message': error_message})
+                   'error_code': status_code, 'error_message': error_message},
+                  status=status_code)
 
 def page_not_found(request, exception):
     return error_handler(request, exception)
