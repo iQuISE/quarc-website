@@ -7,7 +7,7 @@
 	<img src="/media/{{member.profile_image}}" class="img-rounded img-shadow grid-photo mb-3" alt="{{ member.first_name }} {{ member.last_name }}" />
 	{% endif %}
 	<h2>{{member.first_name}} {{member.last_name}}</h2>
-	<p class="text-primary">{{member.role}}{% if member.role != 100 %} Chair{% endif %}</p>
+	<p class="text-primary">{{member.role}}</p>
 	<p class="text-muted">Email: <a href="mailto:{{member.email}}" class="link-muted">{{member.email}}</a></p>
 	{% if member.status %}<p class="text-muted">{{member.status}}{% if member.group %} in the {{member.group}}{% endif %}</p>{% endif %}
 </div>
