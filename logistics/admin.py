@@ -59,7 +59,7 @@ admin.site.register(Buses, BusesAdmin)
 
 @admin.action(description='Export logistics to CSV')
 def export_logistics_to_csv(modeladmin, request, queryset):
-    RM_FIELDS = ['ID', 'attendee', 'latest', 'edit_time']
+    RM_FIELDS = ['ID', 'attendee', 'latest', 'edit_time', 'edit_reason']
     opts = modeladmin.model._meta
     filename = opts.verbose_name
     response = HttpResponse(content_type='text/csv',
