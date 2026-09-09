@@ -62,7 +62,9 @@ def export_attendees_to_csv(modeladmin, request, queryset):
 
     fields = {'attendee': [Attendee._meta.get_field('first_name'),
                            Attendee._meta.get_field('last_name'),
-                           Attendee._meta.get_field('email')]}
+                           Attendee._meta.get_field('email'),
+                           Attendee._meta.get_field('status'),
+                           Attendee._meta.get_field('affiliation')]}
     header_row = [field.verbose_name for field in fields['attendee']]
     for model in models:
         opts = model._meta
