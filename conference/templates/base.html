@@ -26,7 +26,13 @@
             font-size: 14px;
             line-height: 1.6;
             color: #333;
-            background-color: #fff;
+            {% if conference.background %}
+            background-image: url("/media/{{conference.background}}");
+            background-position: left top;
+            background-size: auto;
+            background-repeat: repeat-y;
+            background-attachment: scroll;
+            {% else %}background-color: #fff;{% endif %}
         }
 
         .navbar {
@@ -247,7 +253,6 @@
             background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
             color: white;
             padding: 40px 0 20px;
-            margin-top: 60px;
         }
 
         .footer-content {

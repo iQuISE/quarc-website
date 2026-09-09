@@ -27,6 +27,7 @@ class QuARCConference(models.Model):
     secondary_color = models.CharField(max_length=32, blank=False, default='#8300e9')
     dark_color = models.CharField(max_length=32, blank=False, default='#1a1a1a')
     light_color = models.CharField(max_length=32, blank=False, default='#ffffff')
+    background = models.ImageField(upload_to='homepage_images', blank=True, null=True)
 
     def __str__(self):
         return 'QuARC %d' % self.year
