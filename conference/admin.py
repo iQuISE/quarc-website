@@ -52,7 +52,7 @@ def delete_attendee_logistics(modeladmin, request, queryset):
 @admin.action(description='Export attendees to CSV')
 def export_attendees_to_csv(modeladmin, request, queryset):
     '''Export attendees and all their logistics to CSV. Abstract attachments not included.'''
-    RM_FIELDS = ['ID', 'attendee', 'latest', 'edit_time', 'edit_reason']
+    RM_FIELDS = ['ID', 'id', 'attendee', 'latest', 'edit_time', 'edit_reason']
     models = [Abstract, Acceptance, MARC, HousingPreferences, HousingAssignments,
               Dinner, Activities, Swag, Bus]
     filename = 'attendees'
@@ -63,6 +63,7 @@ def export_attendees_to_csv(modeladmin, request, queryset):
     fields = {'attendee': [Attendee._meta.get_field('first_name'),
                            Attendee._meta.get_field('last_name'),
                            Attendee._meta.get_field('email')]}
+    header_row = [field.verbose_name for field in fields['attendee']]
     for model in models:
         opts = model._meta
         model_fields = [field for field in opts.get_fields()
@@ -70,18 +71,22 @@ def export_attendees_to_csv(modeladmin, request, queryset):
         model_fields = [field for field in model_fields if field.name not in RM_FIELDS]
 
         fields[opts.verbose_name] = model_fields
-    # Write a first row with header information
-    writer.writerow([field.verbose_name for field in fields.values()])
+        header_row += [field.verbose_name for field in model_fields]
+    # Write header information
+    writer.writerow(header_row)
     # Write data rows
     for obj in queryset:
         data_row = []
         for field in fields['attendee']:
-            value = getattr(obj.attendee, field.name)
+            value = getattr(obj, field.name)
             if isinstance(value, datetime):
                 value = value.strftime('%Y-%m-%d')
             data_row.append(value)
         for model in models:
-            model_attendee_data = model.objects.filter(attendee=obj, latest=True).first()
+            if model in [Abstract]: # Models without a latest
+                model_attendee_data = model.objects.filter(attendee=obj).first()
+            else:
+                model_attendee_data = model.objects.filter(attendee=obj, latest=True).first()
             for field in fields[model._meta.verbose_name]:
                 if model_attendee_data is None:
                     data_row.append('')
@@ -315,7 +320,7 @@ class AttendeeAdmin(admin.ModelAdmin):
                        bus_logistics_complete, marc_logistics_complete,
                        housing_assigned, bus_to_assigned, bus_from_assigned)
     actions = [accept_attendees, reject_attendees, remove_attendee_session_assignment,
-               delete_attendee_logistics, email_attendees]
+               delete_attendee_logistics, email_attendees, export_attendees_to_csv]
     inlines = (AttendeeAbstractInline,
                AttendeeAcceptanceInline,
                AttendeeLogisticsDinnerInline,
