@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 import os
 import hashlib
@@ -64,23 +65,22 @@ class CommitteeMember(models.Model):
         return '%s, %s'%(self.last_name, self.first_name)
 
 class CommitteeRole(models.Model):
-    class RoleType(models.IntegerChoices):
-        Committee = 0
-        Design = 1
-        Logistics = 2
-        Social = 3
-        Programming = 4
-        Swag = 5
-        Photography = 6
-        Web = 7
-
-    role_type = models.IntegerField(choices=RoleType.choices)
-    role_conference = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
-    member = models.ForeignKey(CommitteeMember, on_delete=models.CASCADE)
-    
-    class Meta:
-        ordering = ['role_type']
+    role = models.CharField(max_length=32, blank=False)
+    sort_order = models.IntegerField(validators=[MinValueValidator(1),
+                                                 MaxValueValidator(1000)],
+                                     default=None, null=True, blank=True)
 
     def __str__(self):
-        return '%d %s Chair, %s %s'%(self.role_conference.year, self.get_role_type_display(),
-                                     self.member.first_name, self.member.last_name)
+        return '%s' % self.role
+
+class CommitteeAssignment(models.Model):
+    quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
+    role = models.ForeignKey(CommitteeRole, on_delete=models.CASCADE)
+    member = models.ForeignKey(CommitteeMember, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['role__sort_order']
+
+    def __str__(self):
+        return '%d %s, %s %s' % (self.quarc.year, self.role.role,
+                                 self.member.first_name, self.member.last_name)

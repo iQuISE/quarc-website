@@ -76,7 +76,7 @@ def registration_abstract_submission(request, year):
     if request.method == 'POST':
         attendee_form = AttendeeForm(data=request.POST)
         marc_form = MARCForm(data=request.POST)
-        abstract_form = AbstractForm(data=request.POST)
+        abstract_form = AbstractForm(data=request.POST, files=request.FILES)
 
         attendee_form.instance.quarc = conf
 
@@ -87,6 +87,7 @@ def registration_abstract_submission(request, year):
                     email = attendee_form.cleaned_data['email']
                     Attendee.objects.filter(quarc=conf, email__iexact=email).delete()
                     attendee_form = AttendeeForm(data=request.POST)
+                    attendee_form.instance.quarc = conf
 
         if attendee_form.is_valid():
             attendee = attendee_form.save(commit=False)

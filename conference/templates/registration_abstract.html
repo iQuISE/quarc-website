@@ -3,21 +3,13 @@
 <div class="content-section">
 	<h2>Registration with Abstract</h2>
 	<p> Registration form for students and postdocs who are submitting abstracts to QuARC {{conference.year}}. Please register by {{ conference.registration_end|date:"F jS, Y" }}. Industry members, staff, and faculty are not required to submit abstracts and may use the <a href="{% url 'registration_university_industry' conference.year %}">University and Industry Personnel</a> page.</p>
-	<form method="post" action="#">
+	<form method="post" action="#" enctype="multipart/form-data">
 		{% csrf_token %}
 		{% if attendee_form.errors %}
 		<div class="alert alert-danger">
 			<h5>Personal Information Errors</h5>
-			<ul>
-				{% for field, errors in attendee_form.errors.items %}
-				<li><strong>{{ field }}:</strong>
-					<ul>
-						{% for error in errors %}
-						<li>{{ error }}</li>
-						{% endfor %}
-					</ul>
-				</li>
-				{% endfor %}
+			<ul>{% for field, errors in attendee_form.errors.items %}{% for error in errors %}
+				<li>{{ error }}</li>{% endfor %}{% endfor %}
 			</ul>
 		</div>
 		{% endif %}
@@ -51,7 +43,7 @@
 				<option value="null">Select status...</option>
 				{% for status in status_choices %}
 				<option value="{{status.0}}"
-							   {% if status.0 == attendee_form.instance.status %}selected{% endif %}>{{status.1}}</option>
+						{% if status.0 == attendee_form.instance.status %}selected{% endif %}>{{status.1}}</option>
 				{% endfor %}
             </select>
 		</div>
@@ -65,16 +57,8 @@
 		{% if abstract_form.errors %}
 		<div class="alert alert-danger">
 			<h5>Abstract Errors</h5>
-			<ul>
-				{% for field, errors in abstract_form.errors.items %}
-				<li><strong>{{ field }}:</strong>
-					<ul>
-						{% for error in errors %}
-						<li>{{ error }}</li>
-						{% endfor %}
-					</ul>
-				</li>
-				{% endfor %}
+			<ul>{% for field, errors in abstract_form.errors.items %}{% for error in errors %}
+				<li>{{ error }}</li>{% endfor %}{% endfor %}
 			</ul>
 		</div>
 		{% endif %}
@@ -127,10 +111,10 @@
 					<option value="null">Select area...</option>
 					{% for area in research_areas %}
 					<option value="{{area}}"
-							{% if area == attendee_form.instance.research_area %}selected{% endif %}>{{area}}</option>
+								   {% if area == attendee_form.instance.research_area %}selected{% endif %}>{{area}}</option>
 					{% endfor %}
 					<option value="other"
-							{% if "other" == attendee_form.instance.research_area %}selected{% endif %}>Other</option>
+								   {% if "other" == attendee_form.instance.research_area %}selected{% endif %}>Other</option>
 				</select>
 				<input type="text" class="form-control" id="id_research_area_other" name="research_area_other" value="{{attendee_form.instance.research_area}}">
             </div>
@@ -140,7 +124,7 @@
 					<option value="null">Select goal...</option>
 					{% for goal in research_goals %}
 					<option value="{{goal}}"
-							{% if goal == attendee_form.instance.research_goal %}selected{% endif %}>{{goal}}</option>
+								   {% if goal == attendee_form.instance.research_goal %}selected{% endif %}>{{goal}}</option>
 					{% endfor %}
 				</select>
             </div>
@@ -205,10 +189,9 @@
                 </label>
             </div>
         </div>
-    </div>
-    <div class="text-center">
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </div>
+		<div class="text-center">
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</div>
 	</form>
 </div>
 {% endblock %}

@@ -3,13 +3,16 @@
 <div class="content-section">
 	<h2>Registration (No Abstract)</h2>
 	<p> Registration form for industry affiliates, as well as postdocs and researchers who are not submitting abstracts to QuARC {{conference.year}}. Please register by {{ conference.registration_end|date:"F jS, Y" }}. Note that students must submit abstracts to attend QuARC and should therefore direct themselves to the <a href="{% url 'registration_abstract_submission' conference.year %}">Abstract Submission</a> page. Student co-authors may complete this form </p>
-	<ul>
-		{% for error in errors %}
-		{{error}}
-		{% endfor %}
-	</ul>
 	<form method="post" action="#">
 		{% csrf_token %}
+		{% if attendee_form.errors %}
+		<div class="alert alert-danger">
+			<h5>Personal Information Errors</h5>
+			<ul>{% for field, errors in attendee_form.errors.items %}{% for error in errors %}
+				<li>{{ error }}</li>{% endfor %}{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
 		<div class="row mb-3">
             <div class="col-md-6">
 				<label for="id_first_name" class="form-label">First Name <span class="text-danger">*</span></label>
