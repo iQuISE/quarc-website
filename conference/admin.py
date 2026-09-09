@@ -83,6 +83,8 @@ def export_attendees_to_csv(modeladmin, request, queryset):
             value = getattr(obj, field.name)
             if isinstance(value, datetime):
                 value = value.strftime('%Y-%m-%d')
+            if isinstance(value, int):
+                value = getattr(obj, 'get_{}_display'.format(field.name))()
             data_row.append(value)
         for model in models:
             if model in [Abstract]: # Models without a latest
