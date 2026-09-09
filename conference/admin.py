@@ -49,6 +49,56 @@ def delete_attendee_logistics(modeladmin, request, queryset):
     Activities.objects.filter(attendee__pk__in=queryset.values('pk')).update(latest=False)
     Swag.objects.filter(attendee__pk__in=queryset.values('pk')).update(latest=False)
     Bus.objects.filter(attendee__pk__in=queryset.values('pk')).update(latest=False)
+@admin.action(description='Export attendees to CSV')
+def export_attendees_to_csv(modeladmin, request, queryset):
+    '''Export attendees and all their logistics to CSV. Abstract attachments not included.'''
+    RM_FIELDS = ['ID', 'id', 'attendee', 'latest', 'edit_time', 'edit_reason']
+    models = [Abstract, Acceptance, MARC, HousingPreferences, HousingAssignments,
+              Dinner, Activities, Swag, Bus]
+    filename = 'attendees'
+    response = HttpResponse(content_type='text/csv',
+                            headers={"Content-Disposition": f'attachment; filename="{filename}.csv"'})
+    writer = csv.writer(response)
+
+    fields = {'attendee': [Attendee._meta.get_field('first_name'),
+                           Attendee._meta.get_field('last_name'),
+                           Attendee._meta.get_field('email')]}
+    header_row = [field.verbose_name for field in fields['attendee']]
+    for model in models:
+        opts = model._meta
+        model_fields = [field for field in opts.get_fields()
+                        if not field.many_to_many and not field.one_to_many]
+        model_fields = [field for field in model_fields if field.name not in RM_FIELDS]
+
+        fields[opts.verbose_name] = model_fields
+        header_row += [field.verbose_name for field in model_fields]
+    # Write header information
+    writer.writerow(header_row)
+    # Write data rows
+    for obj in queryset:
+        data_row = []
+        for field in fields['attendee']:
+            value = getattr(obj, field.name)
+            if isinstance(value, datetime):
+                value = value.strftime('%Y-%m-%d')
+            data_row.append(value)
+        for model in models:
+            if model in [Abstract]: # Models without a latest
+                model_attendee_data = model.objects.filter(attendee=obj).first()
+            else:
+                model_attendee_data = model.objects.filter(attendee=obj, latest=True).first()
+            for field in fields[model._meta.verbose_name]:
+                if model_attendee_data is None:
+                    data_row.append('')
+                    continue
+
+                value = getattr(model_attendee_data, field.name)
+                if isinstance(value, datetime):
+                    value = value.strftime('%Y-%m-%d')
+                data_row.append(value)
+        writer.writerow(data_row)
+
+    return response
 @admin.action(description='Email attendees')
 def email_attendees(modeladmin, request, queryset):
     if 'post' in request.POST:
@@ -270,7 +320,7 @@ class AttendeeAdmin(admin.ModelAdmin):
                        bus_logistics_complete, marc_logistics_complete,
                        housing_assigned, bus_to_assigned, bus_from_assigned)
     actions = [accept_attendees, reject_attendees, remove_attendee_session_assignment,
-               delete_attendee_logistics, email_attendees]
+               delete_attendee_logistics, email_attendees, export_attendees_to_csv]
     inlines = (AttendeeAbstractInline,
                AttendeeAcceptanceInline,
                AttendeeLogisticsDinnerInline,
