@@ -64,25 +64,25 @@
 		{% endif %}
 		<div class="row mb-3">
             <div class="col-md-12">
-				<label for="id_title" class="form-label">Abstract Title <span class="text-danger">*</span></label>
+				<label for="id_title" class="form-label">Abstract Title <span class="text-danger">*</span> <i>(Maximum 128 characters)</i></label>
 				<input type="text" class="form-control" id="id_title" name="title" value="{{abstract_form.instance.title}}" required>
             </div>
         </div>
 		<div class="row mb-3">
             <div class="col-md-12">
-				<label for="id_author_list" class="form-label">Author List <span class="text-danger">*</span></label>
+				<label for="id_author_list" class="form-label">Author List <span class="text-danger">*</span> <i>(Maximum 2048 characters)</i></label>
 				<input type="text" class="form-control" id="id_author_list" name="author_list" value="{{abstract_form.instance.author_list}}" required>
             </div>
         </div>
 		<div class="row mb-3">
             <div class="col-md-12">
-				<label for="id_funding_sources" class="form-label">Funding Sources <span class="text-danger">*</span></label>
+				<label for="id_funding_sources" class="form-label">Funding Sources <span class="text-danger">*</span> <i>(Maximum 2048 characters)</i></label>
 				<input type="text" class="form-control" id="id_funding_sources" name="funding_sources" value="{{abstract_form.instance.funding_sources}}" required>
             </div>
         </div>
 		<div class="row mb-3">
             <div class="col-md-12">
-				<label for="id_publications" class="form-label">Publications</label>
+				<label for="id_publications" class="form-label">Publications <i>(Maximum 2048 characters)</i></label>
 				<input type="text" class="form-control" id="id_publications" name="publications" value="{{abstract_form.instance.publications}}">
 				<p>If the work described in this abstract has been published, you may provide a citation here</p>
             </div>
@@ -94,13 +94,13 @@
 				<p><i>Maximum upload size 10Mb</i></p>
             </div>
             <div class="col-md-6">
-				<label for="id_figure_caption" class="form-label">Figure Caption</label>
+				<label for="id_figure_caption" class="form-label">Figure Caption <i>(Maximum 2048 characters)</i></label>
 				<textarea class="form-control" id="id_figure_caption" name="figure_caption" rows="3">{{abstract_form.instance.figure_caption}}</textarea>
             </div>
         </div>
 		<div class="row mb-3">
             <div class="col-md-12">
-				<label for="id_abstract" class="form-label">Abstract Text <span class="text-danger">*</span></label>
+				<label for="id_abstract" class="form-label">Abstract Text <span class="text-danger">*</span> <i>(Maximum 4096 characters)</i></label>
 				<textarea class="form-control" id="id_abstract" name="abstract" rows="5" required>{{abstract_form.instance.abstract}}</textarea>
             </div>
         </div>
@@ -131,7 +131,7 @@
 		</div>
 		<div class="row mb-3">
             <div class="col-md-6">
-				<label for="id_research_group" class="form-label">Research Group <span class="text-danger">*</span></label>
+				<label for="id_research_group" class="form-label">Research Group <span class="text-danger">*</span> <i>(Maximum 64 characters)</i></label>
 				<input type="text" class="form-control" id="id_research_group" name="research_group" value="{{abstract_form.instance.research_group}}" required>
             </div>
             <div class="col-md-6">
