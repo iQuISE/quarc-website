@@ -310,7 +310,7 @@ def bus_from_assigned(attendee):
 class AttendeeAdmin(admin.ModelAdmin):
     list_filter = [QuARCFilter, AttendeeAcceptedFilter, AttendeeDroppedFilter, 'status',
                    AttendeeLogisticsFilter, AttendeeAbstractSessionFilter]
-    list_display = ['first_name', 'last_name', 'email', 'affiliation',
+    list_display = ['first_name', 'last_name', 'email', 'status', 'affiliation',
                     abstract_research_group, abstract_title, attendee_abstract_session, abstract_content]
     list_display_links = ['first_name', 'last_name']
     fields = ['quarc', ('first_name', 'middle_name', 'last_name', 'suffix'),
