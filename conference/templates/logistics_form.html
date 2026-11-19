@@ -28,7 +28,7 @@
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="id_overnight_required" name="overnight_required" value="True" {% if housing_form.instance.overnight_required %}checked{% endif %}>
                     <label class="form-check-label" for="id_overnight_required">
-                        I require overnight accommodation
+                        I require overnight accommodation from {{ conference.start_date|date:"l, F jS" }} to {{ conference.end_date|date:"l, F jS" }}.
                     </label>
                 </div>
             </div>
@@ -232,8 +232,8 @@
 					<label for="id_bus_to_type" class="form-label">Bus Time <span class="text-danger">*</span></label>
 					<select class="form-select" id="id_bus_to_type" name="bus_to_type">
 						<option value="">-- Select --</option>
-						<option value="0" {% if bus_form.instance.bus_to_type == 0 %}selected{% endif %}>Early</option>
-						<option value="1" {% if bus_form.instance.bus_to_type == 1 %}selected{% endif %}>Late</option>
+						<option value="0" {% if bus_form.instance.bus_to_type == 0 %}selected{% endif %}>Early (Departing 7:00AM on {{ conference.start_date|date:"l, F jS" }})</option>
+						<option value="1" {% if bus_form.instance.bus_to_type == 1 %}selected{% endif %}>Late (Departing 12:00PM on {{ conference.start_date|date:"l, F jS" }})</option>
 					</select>
 				</div>
             </div>
