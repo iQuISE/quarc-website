@@ -148,7 +148,7 @@ class HousingAssignments(LogisticsModel):
 
 class DinnerOptions(models.Model):
     quarc = models.ForeignKey(QuARCConference, on_delete=models.CASCADE)
-    option = models.CharField(max_length=32, blank=False)
+    option = models.CharField(max_length=256, blank=False)
 
     def __str__(self):
         return '%s' % (self.option)
