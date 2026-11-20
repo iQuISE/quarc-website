@@ -169,8 +169,11 @@
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="id_winter_activities" name="winter_activities" value="True" {% if activities_form.instance.winter_activities %}checked{% endif %}>
                     <label class="form-check-label" for="id_winter_activities">
-                        I plan to ski on {{ conference.start_date|date:"l, F jS" }}
+                        I will ski on {{ conference.start_date|date:"l, F jS" }}
                     </label>
+                </div>
+                <div class="winter-activities-section">
+                    By selecting this option, you commit to purchasing a lift ticket when they become available. Please select this only if you will purchase a lift ticket.
                 </div>
             </div>
         </div>
@@ -287,6 +290,7 @@
 					['id_gender', 'id_preferred_roommate_gender']);
 	 showByCheckbox('id_dinner_required', 'dinner-section', ['id_dinner_option']);
 	 showByCheckbox('id_bus_to_required', 'bus-to-section', ['id_bus_to_type']);
+	 showByCheckbox('id_winter_activities', 'winter-activities-section', []);
 
      const roommateSelector = document.getElementById('id_preferred_roommate');
      const roommateOther = document.getElementById('roommate_other');
