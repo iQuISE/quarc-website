@@ -190,7 +190,7 @@ def registration_closed(request, year):
     if conf.abstract_submission_active:
         return registration_abstract_submission(request, year)
 
-    will_open = datetime.now() < conf.registration_start
+    will_open = datetime.now().date() < conf.registration_start
 
     return render(request, 'registration_closed.html',
                   {'conference': conf, 'show_countdown': False,
