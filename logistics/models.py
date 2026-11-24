@@ -171,7 +171,8 @@ class Dinner(LogisticsModel):
         return '%s %s' % (self.attendee.first_name, self.attendee.last_name)
 
     def clean(self):
-        if self.dinner_option.quarc != self.attendee.quarc:
+        if (self.dinner_option is not None
+            and self.dinner_option.quarc != self.attendee.quarc):
             raise ValidationError('Dinner option QuARC does not match attendee QuARC')
         super().clean()
 
