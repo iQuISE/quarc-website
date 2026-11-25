@@ -269,7 +269,9 @@
 					 showDiv.style.display = showDiv.hidden_style;
 				 }
 				 for(const id of requiredIds){
-					 document.getElementById(id).required = true;
+					 if(document.getElementById(id)){
+						 document.getElementById(id).required = true;
+					 }
 				 }
 			 }
 			 else{
@@ -278,7 +280,9 @@
 					 showDiv.style.display = 'none';
 				 }
 				 for(const id of requiredIds){
-					 document.getElementById(id).required = false;
+					 if(document.getElementById(id)){
+						 document.getElementById(id).required = false;
+					 }
 				 }
 			 }
 		 }
@@ -303,7 +307,9 @@
 			 roommateOther.style.display = 'none';
 		 }
 	 }
-     roommateSelector.addEventListener('change', updateRoommateOther);
+	 if(roommateSelector){
+		 roommateSelector.addEventListener('change', updateRoommateOther);
+	 }
      updateRoommateOther();
  });
 </script>
